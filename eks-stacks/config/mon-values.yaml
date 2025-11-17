@@ -1,0 +1,274 @@
+nameOverride: "mon"
+namespaceOverride: "monitoring"
+fullnameOverride: "mon"
+
+commonLabels:
+  node-role: "control-plane"
+
+crds:
+  enabled: true
+
+grafana:
+  fullnameOverride: "mon-grafana" # avoids random values in the same
+  envFromSecret: "mon-grafana-auth"
+  testFramework:
+    enabled: false
+  service:
+    targetPort: 3000
+  admin:
+    existingSecret: mon-grafana-auth
+
+  envValueFrom:
+    ES_PASSWORD:
+      secretKeyRef:
+        name: elasticsearch
+        key: elasticsearch-password
+
+  extraSecretMounts:
+    - name: es-certs
+      mountPath: /etc/grafana/certs
+      secretName: elasticsearch-coordinating-crt
+      readOnly: true
+      optional: true
+
+  sidecar:
+    datasources:
+      enabled: true
+      searchNamespace: monitoring,log-system
+      resource: configmap
+      ignoreAlreadyProcessed: false
+      skipReload: false
+    dashboards:
+      ignoreAlreadyProcessed: false
+      skipReload: false
+      searchNamespace: ALL
+      resource: configmap
+      defaultFolderName: nl-internal
+      folderAnnotation: "grafana_folder"
+      annotations:
+        grafana_folder: "nl-internal"
+      provider:
+        name: sidecarProvider
+        orgid: 1
+        type: file
+        disableDelete: false
+        allowUiUpdates: true
+        foldersFromFilesStructure: true
+
+  additionalDataSources:
+    - name: Thanos
+      type: prometheus
+      uid: thanos
+      url: http://thanos-query-frontend.monitoring:9090/
+      access: proxy
+      isDefault: false
+      jsonData:
+        httpMethod: POST
+        timeInterval: 30s
+        prometheusType: Thanos
+        cacheLevel: 'Medium'
+    - name: KubeEvents
+      uid: k8sevents
+      type: elasticsearch
+      access: proxy
+      url: https://elasticsearch-coordinating-hl.log-system.svc.cluster.local:9200
+      database: "[events-*]"
+      isDefault: false
+      version: 7
+      editable: true
+      basicAuth: true
+      basicAuthUser: elastic
+      secureJsonData:
+        basicAuthPassword: ${ES_PASSWORD}
+      jsonData:
+        timeField: "@timestamp"
+        esVersion: "8.16.1"
+        maxConcurrentShardRequests: 10
+        logMessageField: "message"
+        logLevelField: "event_type"
+        interval: "Daily"
+        timeInterval: "10s"
+        includeFrozen: false
+        xpack: false
+        tlsAuth: true
+        tlsAuthWithCACert: true
+        tlsSkipVerify: true # cannot get this to work when set to false
+        tlsCACertFile: /etc/grafana/certs/ca.crt
+        tlsClientCertFile: /etc/grafana/certs/tls.crt
+        tlsClientKeyFile: /etc/grafana/certs/tls.key
+    - name: Logs
+      uid: logs
+      type: elasticsearch
+      access: proxy
+      url: https://elasticsearch-coordinating-hl.log-system.svc.cluster.local:9200
+      database: "[logs-*]"
+      isDefault: false
+      version: 7
+      editable: true
+      basicAuth: true
+      basicAuthUser: elastic
+      secureJsonData:
+        basicAuthPassword: ${ES_PASSWORD}
+      jsonData:
+        timeField: "@timestamp"
+        esVersion: "8.16.1"
+        maxConcurrentShardRequests: 10
+        logMessageField: "message"
+        logLevelField: "severity"
+        interval: "Daily"
+        timeInterval: "10s"
+        includeFrozen: false
+        xpack: false
+        tlsAuth: true
+        tlsAuthWithCACert: true
+        tlsSkipVerify: true # cannot get this to work when set to false
+        tlsCACertFile: /etc/grafana/certs/ca.crt
+        tlsClientCertFile: /etc/grafana/certs/tls.crt
+        tlsClientKeyFile: /etc/grafana/certs/tls.key
+    - name: OTELLogs
+      uid: otellogs
+      type: elasticsearch
+      access: proxy
+      url: https://elasticsearch-coordinating-hl.log-system.svc.cluster.local:9200
+      database: "[otel-logs-*]"
+      isDefault: false
+      version: 7
+      editable: true
+      basicAuth: true
+      basicAuthUser: elastic
+      secureJsonData:
+        basicAuthPassword: ${ES_PASSWORD}
+      jsonData:
+        timeField: "@timestamp"
+        esVersion: "8.16.1"
+        maxConcurrentShardRequests: 10
+        logMessageField: "message"
+        logLevelField: "severity"
+        interval: "Daily"
+        timeInterval: "10s"
+        includeFrozen: false
+        xpack: false
+        tlsAuth: true
+        tlsAuthWithCACert: true
+        tlsSkipVerify: true # cannot get this to work when set to false
+        tlsCACertFile: /etc/grafana/certs/ca.crt
+        tlsClientCertFile: /etc/grafana/certs/tls.crt
+        tlsClientKeyFile: /etc/grafana/certs/tls.key
+
+  extraContainers: |
+    - args:
+        - --whitelist-domain=.amazoncognito.com
+      envFrom:
+        - configMapRef:
+            name: oauth2-proxy-config-grafana
+        - secretRef:
+            name: oauth2-proxy-client
+      image: quay.io/oauth2-proxy/oauth2-proxy:v7.6.0
+      imagePullPolicy: IfNotPresent
+      livenessProbe:
+        failureThreshold: 3
+        httpGet:
+          path: /ping
+          port: 8888
+          scheme: HTTP
+        initialDelaySeconds: 5
+        periodSeconds: 5
+        successThreshold: 1
+        timeoutSeconds: 1
+      name: oauth2-proxy
+      ports:
+        - containerPort: 8888
+          name: proxy
+          protocol: TCP
+      readinessProbe:
+        failureThreshold: 3
+        httpGet:
+          path: /ping
+          port: 8888
+          scheme: HTTP
+        initialDelaySeconds: 5
+        periodSeconds: 5
+        successThreshold: 1
+        timeoutSeconds: 1
+      resources:
+        limits:
+          cpu: 100m
+          memory: 150Mi
+        requests:
+          cpu: 20m
+          memory: 50Mi
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+    - name: authz-filter
+      image: public.ecr.aws/b1l4l6w7/nl-ext/grafana-authz-filter:multiarch-dev
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 8989
+          name: authz
+          protocol: TCP      
+      env:
+      - name: PROXY_PORT
+        value: "3000"
+      - name: GRAFANA_PASS
+        valueFrom:
+          secretKeyRef:
+            key: admin-password
+            name: mon-grafana-auth
+      resources:
+        requests:
+          cpu: 100m
+          memory: 100Mi
+
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    thanos:
+      image: docker.io/bitnami/thanos:0.37.2-debian-12-r5
+      imagePullPolicy: IfNotPresent      
+  thanosService:
+    enabled: true
+  thanosServiceMonitor:
+    enabled: true
+
+kube-state-metrics:
+  metricLabelsAllowlist: ["pods=[*]"]
+
+alertmanager:
+  config:
+    global:
+      resolve_timeout: 5m
+      slack_api_url: 'https://hooks.slack.com/services/' #Required for alertmamager to work
+    inhibit_rules:
+      - source_matchers:
+          - 'severity = critical'
+        target_matchers:
+          - 'severity =~ warning|info'
+        equal:
+          - 'namespace'
+          - 'alertname'
+      - source_matchers:
+          - 'severity = warning'
+        target_matchers:
+          - 'severity = info'
+        equal:
+          - 'namespace'
+          - 'alertname'
+      - source_matchers:
+          - 'alertname = InfoInhibitor'
+        target_matchers:
+          - 'severity = info'
+        equal:
+          - 'namespace'
+      - target_matchers:
+          - 'alertname = InfoInhibitor'
+    route:
+      group_by: [ 'namespace','job','alertname' ]
+      group_wait: 1m
+      group_interval: 5m
+      repeat_interval: 6h
+      receiver: 'null'      
+    templates:
+      - '/etc/alertmanager/config/*.tmpl'
+  

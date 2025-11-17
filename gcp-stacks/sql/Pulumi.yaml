@@ -1,0 +1,7 @@
+name: sql
+description: Creates cloudSQL instance and the required config for it
+runtime: go
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: gcp-go

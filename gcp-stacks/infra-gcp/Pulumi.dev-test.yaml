@@ -1,0 +1,18 @@
+config:
+  gcp:project: native-link-cloud
+  infra-gcp:kubeVersion: 1.28.15-gke.1480000
+  infra-gcp:armZone1: us-central1-a
+  infra-gcp:armZone2: us-central1-b
+  infra-gcp:baseMachineType: "n1-standard-16"
+  infra-gcp:armMachineType: "t2a-standard-16"  
+  infra-gcp:armMinNodes: 2
+  infra-gcp:armMaxNodes: 20
+  infra-gcp:baseMinNodes: 1
+  infra-gcp:baseMaxNodes: 10
+  infra-gcp:enableGPU: false
+  infra-gcp:gpuMinNodes: 0
+  infra-gcp:gpuMaxNodes: 1
+  infra-gcp:gpuMachineType: "n1-standard-4"
+  infra-gcp:gpuZone1: us-central1-a
+  infra-gcp:gpuZone2: us-central1-b
+  infra-gcp:globalStack: dev-test

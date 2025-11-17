@@ -1,0 +1,7 @@
+name: gcp-stack
+runtime: go
+description: Cloud Platform Pulumi micro stacks
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: gcp-go

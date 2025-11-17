@@ -1,0 +1,19 @@
+config:
+  gcp:project: {{ (datasource "cfg").GcpProject }}
+  api:project: {{ (datasource "cfg").GcpProject }}
+  api:apiEnabled: "true"
+  api:apiImage: "299166832260.dkr.ecr.us-east-2.amazonaws.com/nativelink-api:dev"
+  api:SegmentApiEnabled: "false"
+  api:enableTemporal: "true"
+  api:pgUsername: "nlssapidb"
+  api:profile: "NativeLinkCloudGKEAccess"
+  api:gcpAWSRoleArn: "arn:aws:iam::299166832260:role/gke-nativelink-cloud-deployer"
+  api:gcpAWSSub: "115077250155057901318"  
+  api:dbOffsiteBackupBucket: "gs://nativelink-offsite-db-backups/dev-usw2"
+  api:dbOffsiteBackupProject: {{ (datasource "cfg").GcpProject }}
+  api:dbOffsiteBackupServiceAccount: "gcs-backup@native-link-cloud.iam.gserviceaccount.com"
+  api:nativeLinkImage: "ghcr.io/tracemachina/nativelink:asrjx5ppkxjfxyhk88r5dk8hm6j33vf2"
+  api:clusterIssuerName: "letsencrypt-tls-issuer"
+  api:globalStack: {{ (datasource "cfg").StackName }}
+  api:ecrRegion: "us-east-2"
+  api:awsRegion: "us-west-2"

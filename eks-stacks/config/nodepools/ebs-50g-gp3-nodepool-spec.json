@@ -1,0 +1,44 @@
+{
+  "spec": {
+    "disruption": {
+      "consolidationPolicy": "WhenUnderutilized",
+      "expireAfter": "Never"
+    },
+    "template": {
+      "metadata": {
+        "labels": {
+          "node-role": "autoscaled-ondemand-ebs50g"
+        }
+      },
+      "spec": {
+        "nodeClassRef": {
+          "name": "ebs-50g-gp3-nodeclass"
+        },
+        "requirements": [
+          {
+            "key": "karpenter.k8s.aws/instance-family",
+            "operator": "In",
+            "values": ["r7i","m7i","c7i","r6i","m6i","c6i","r7g","m7g","c7g","r6g","m6g","c6g"]
+          },
+          {
+            "key": "karpenter.k8s.aws/instance-size",
+            "operator": "In",
+            "values": ["large","xlarge","2xlarge","4xlarge"]
+          },
+          {
+            "key": "karpenter.sh/capacity-type",
+            "operator": "In",
+            "values": [
+              "on-demand"
+            ]
+          },
+          {
+            "key": "kubernetes.io/arch",
+            "operator": "In",
+            "values": ["amd64","arm64"]
+          }
+        ]
+      }
+    }
+  }
+}

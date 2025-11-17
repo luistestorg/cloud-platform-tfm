@@ -1,0 +1,7 @@
+config:
+  gcp:project: {{ (datasource "cfg").GcpProject }}
+  sql:dbEdition: "ENTERPRISE"
+  sql:dbInstanceType: {{ (datasource "cfg").DbInstanceType }}
+  sql:dbName: {{ (datasource "cfg").StackName }}
+  sql:zone: {{ (datasource "cfg").GcpZone }}
+  sql:globalStack: {{ (datasource "cfg").StackName }}

@@ -1,0 +1,11 @@
+config:
+  gcp:project: native-link-cloud
+  sql:dbEdition: "ENTERPRISE"
+  sql:dbInstanceType: db-f1-micro
+  sql:dbName: dev-test
+  sql:zone: us-central1-a
+  sql:globalStack: dev-test
+  sql:dbPassword:
+    secure: AAABADe/zEdUTjx8o23MUjqPpU55bY1UjqiyOPxjW5oPyCh7q/opzo6LzpF1K3oSLYAYkL/U8snFbWj4F7s/QQ==
+  sql:pgPassword:
+    secure: AAABABFTXDXvqC4Dnv5dkgSd58caqf9f40kL/tXDxR3ODS1+uISOd2/fsdAoiVaId66iJwbL6JS41oEwIibmkQ==

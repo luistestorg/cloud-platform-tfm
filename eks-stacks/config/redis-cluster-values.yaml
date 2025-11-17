@@ -1,0 +1,26 @@
+usePassword: false
+nameOverride: redis-cluster
+fullnameOverride: redis-cluster
+global:
+  storageClass: gp3-enc
+persistence:
+  size: 40Gi
+redis:
+  resources:
+    limits:
+      cpu: 1750m
+      ephemeral-storage: 8Gi
+      memory: 15000Mi
+    requests:
+      cpu: 1600m
+      ephemeral-storage: 6Gi
+      memory: 14000Mi
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+networkPolicy:
+  enabled: false
+cluster:
+  nodes: 6 # redis requires 3 master nodes and 3 replicas
+  replicas: 1

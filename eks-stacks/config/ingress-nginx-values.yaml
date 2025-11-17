@@ -1,0 +1,52 @@
+controller:
+  config:
+    ignore-invalid-headers: "false"
+    max-worker-connections: "10000"
+    max-worker-open-files: "50204"
+    upstream-keepalive-connections: "200"
+    keep-alive-requests: "100000000"
+    proxy_next_upstream: "error timeout http_502 http_503"
+    log-format-escape-json: "true"
+    log-format-upstream: '{"timestamp": "$time_iso8601", "ingress_namespace":"$namespace", "ingress":"$ingress_name", "requestID": "$req_id", "remote_addr":"$remote_addr","user_agent":"$http_user_agent","http_version":"$server_protocol","request_body_bytes":$body_bytes_sent,"request_size":$request_length,"method":"$request_method","referrer":"$http_referer","response_body_bytes":$body_bytes_sent,"response_size":$bytes_sent,"status_code":"$status","time":$request_time,"host":"$host","path":"$uri","query":"$args"}'
+  allowSnippetAnnotations: false
+  replicaCount: 1
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      scrapeInterval: 15s
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 18
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+    behavior:
+      scaleDown:
+        stabilizationWindowSeconds: 120
+  tolerations:
+    - effect: NoSchedule
+      key: nativelink/tolerates-spot
+      operator: Exists
+  affinity:
+    podAntiAffinity:
+      # prefer replicas to be spread across zones and nodes
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: "app.kubernetes.io/name"
+                  operator: In
+                  values:
+                    - ingress-nginx
+            topologyKey: topology.kubernetes.io/zone
+          weight: 100
+        - podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: "app.kubernetes.io/name"
+                  operator: In
+                  values:
+                    - ingress-nginx
+            topologyKey: kubernetes.io/hostname
+          weight: 100

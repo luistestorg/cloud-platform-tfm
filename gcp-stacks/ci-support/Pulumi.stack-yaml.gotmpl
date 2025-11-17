@@ -1,0 +1,9 @@
+config:  
+  gcp:project: {{ (datasource "cfg").GcpProject }}
+  ci-support:project: {{ (datasource "cfg").GcpProject }}  
+  ci-support:globalStack: {{ (datasource "cfg").StackName }}
+  ci-support:enableTekton: true
+  ci-support:enableActionsController: true
+  ci-support:enableUISecretUpdater: true
+  ci-support:uiNamespace: "web-ui-dev"
+  ci-support:githubConfigUrl: "https://github.com/TraceMachina/cloud-platform"

@@ -1,0 +1,71 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: offsite-db-backup-cronjob
+  namespace: nativelink-api
+spec:
+  schedule: "*/30 * * * *"
+  concurrencyPolicy: "Replace"
+  failedJobsHistoryLimit: 3
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          priorityClassName: "system-cluster-critical"
+          nodeSelector:
+            kubernetes.io/arch: amd64
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            supplementalGroups: [ 10001 ]
+            fsGroup: 10001
+          volumes:
+            - name: gcp-key
+              secret:
+                secretName: gcloud-sa-key-file
+            - name: local-data
+              emptyDir: {}
+          initContainers:
+            - name: run-pg-dump
+              image: 299166832260.dkr.ecr.us-east-2.amazonaws.com/docker-hub/andreswebs/postgresql-client
+              volumeMounts:
+                - name: local-data
+                  mountPath: /tmp/shared-dir
+              envFrom:
+                - secretRef:
+                    name: offsite-backup-env
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: password
+                      name: postgres
+              securityContext:
+                runAsUser: 1000
+              command: [ "/bin/sh" ]
+              args: ["-c", "pg_dump --dbname nlssapidb -f /tmp/shared-dir/nlssapidb-`date +'%Y-%m-%d-%H-%M'`.tar -Fc --no-owner && pg_dump --dbname temporal -f /tmp/shared-dir/temporal-`date +'%Y-%m-%d-%H-%M'`.tar -Fc --no-owner -C && pg_dump --dbname temporal_visibility -f /tmp/shared-dir/temporal_visibility-`date +'%Y-%m-%d-%H-%M'`.tar -Fc --no-owner -C"]
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 64Mi
+          containers:
+            - name: upload-backup-to-gcs
+              image: gcr.io/google.com/cloudsdktool/google-cloud-cli:stable
+              envFrom:
+                - secretRef:
+                    name: offsite-backup-env
+              volumeMounts:
+                - mountPath: "/tmp/gcp-key"
+                  name: gcp-key
+                  readOnly: true
+                - name: local-data
+                  mountPath: /tmp/shared-dir
+              command: [ "/bin/sh" ]
+              args: ["-c", "gcloud auth activate-service-account $(GCP_SA_EMAIL) --key-file=/tmp/gcp-key/key.json --project=$(GCP_PROJECT) --verbosity=debug && gcloud storage cp /tmp/shared-dir/*.tar $(GCS_BUCKET) --verbosity=debug"]
+              securityContext:
+                runAsUser: 1000
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 64Mi

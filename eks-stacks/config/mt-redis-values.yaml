@@ -1,0 +1,69 @@
+architecture: replication
+auth:
+  enabled: false
+  sentinel: false
+fullnameOverride: mt-redis
+useHostnames: true
+master:
+  persistence:
+    enabled: false
+    size: 12Gi
+    storageClass: gp3-enc
+  podAntiAffinityPreset: "soft"
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+nameOverride: mt-redis
+networkPolicy:
+  enabled: false
+sentinel:
+  enabled: true
+  debug: true
+  masterSet: mt-redis-master
+  quorum: 2
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 20
+    periodSeconds: 10
+    timeoutSeconds: 10
+    successThreshold: 1
+    failureThreshold: 7
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 20
+    periodSeconds: 5
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 7
+pdb:
+  create: true
+  minAvailable: 1
+replica:
+  replicaCount: 3
+  podAntiAffinityPreset: "soft"
+  persistence:
+    enabled: false
+    size: 12Gi
+    storageClass: gp3-enc
+  startupProbe:
+    enabled: true
+    initialDelaySeconds: 20
+    periodSeconds: 10
+    timeoutSeconds: 10
+    successThreshold: 1
+    failureThreshold: 22
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 20
+    periodSeconds: 10
+    timeoutSeconds: 10
+    successThreshold: 1
+    failureThreshold: 7
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 20
+    periodSeconds: 10
+    timeoutSeconds: 10
+    successThreshold: 1
+    failureThreshold: 7

@@ -1,0 +1,25 @@
+config:
+  gcp:project: native-link-cloud
+  api:project: native-link-cloud
+  api:apiEnabled: "true"
+  api:apiImage: "299166832260.dkr.ecr.us-east-2.amazonaws.com/nativelink-api:dev"
+  api:SegmentApiEnabled: "false"
+  api:enableTemporal: "true"
+  api:pgUsername: "nlssapidb"
+  api:profile: "NativeLinkCloudGKEAccess"
+  api:dbOffsiteBackupBucket: "gs://nativelink-offsite-db-backups/dev-usw2"
+  api:dbOffsiteBackupProject: native-link-cloud
+  api:dbOffsiteBackupServiceAccount: "gcs-backup@native-link-cloud.iam.gserviceaccount.com"
+  api:nativeLinkImage: "ghcr.io/tracemachina/nativelink:asrjx5ppkxjfxyhk88r5dk8hm6j33vf2"
+  api:globalStack: dev-test
+  api:ecrRegion: "us-east-2"
+  api:oauth2CookieSecret:
+    secure: AAABAP+kei4o2EuJtrG9z/QvUE0fKwhF8zUpCMRaleMqW/3r8kYgfvIw/Z0AshmwvFBGTmPccnyyjoNjCbWj4g==
+  api:cachePassword:
+    secure: AAABADBBIVc4YJSuMZIsODe1NUNdyVnFGWRAPdOw8ON9PRGyq/1EMPRO1Zg3ofMMviuayTQD3rH3c3xrMvwo/w==
+  api:sharedCachePassword:
+    secure: AAABAGxOkpgogeCErEtZCvgvu/wbt+AgAqObAOhymkQU/fkjLfMirqIfKu5LkVe5M/jzXnueAk6eUmBwxG/aww==
+  api:awsAccessKeyId:
+    secure: AAABACdYYHePwkoZa3fTulrfLvaPZ+1hI0eSm/dj1wDUvLRpp2OX0nLgWMOdk9yzslcTog==
+  api:awsSecretAccessKey:
+    secure: AAABAFsy7vT557hWatRgkGVhHXhXOeI4dmF9U9Hvtrlc+SYL60LiyckgXuoju7RPrIWETBoznFk1CHvCaUjbJ5yDQDUPmmnq

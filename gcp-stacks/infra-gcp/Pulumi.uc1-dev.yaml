@@ -1,0 +1,21 @@
+config:
+  gcp:project: native-link-cloud
+  #Check cluster current version to avoid nodepool recreation because GKE updates the value
+  infra-gcp:kubeVersion: 1.31.8-gke.1045000
+  infra-gcp:armZone1: us-central1-a
+  infra-gcp:armZone2: us-central1-b
+  infra-gcp:armZone3: us-central1-c
+  infra-gcp:baseMachineType: "e2-standard-16"
+  infra-gcp:baseMachineType32cpu: "e2-standard-32"
+  infra-gcp:armMachineType: "t2a-standard-16"  
+  infra-gcp:armMinNodes: 1 # per zone
+  infra-gcp:armMaxNodes: 20
+  infra-gcp:baseMinNodes: 1 # per zone
+  infra-gcp:baseMaxNodes: 20
+  infra-gcp:enableGPU: false
+  infra-gcp:gpuMinNodes: 0
+  infra-gcp:gpuMaxNodes: 1
+  infra-gcp:gpuMachineType: "n1-standard-4"
+  infra-gcp:gpuZone1: us-central1-f
+  infra-gcp:gpuZone2: us-central1-a
+  infra-gcp:globalStack: uc1-dev

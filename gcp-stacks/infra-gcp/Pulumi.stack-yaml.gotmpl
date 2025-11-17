@@ -1,0 +1,18 @@
+config:
+  gcp:project: {{ (datasource "cfg").GcpProject }}
+  infra-gcp:kubeVersion: {{ (datasource "cfg").GkeVersion }}
+  infra-gcp:armZone1: {{ (datasource "cfg").GcpZone }}
+  infra-gcp:armZone2: {{ (datasource "cfg").GcpZone2 }}
+  infra-gcp:baseMachineType: "n1-standard-16"
+  infra-gcp:armMachineType: "t2a-standard-16"  
+  infra-gcp:armMinNodes: 2
+  infra-gcp:armMaxNodes: 20
+  infra-gcp:baseMinNodes: 1
+  infra-gcp:baseMaxNodes: 10
+  infra-gcp:enableGPU: false
+  infra-gcp:gpuMinNodes: 0
+  infra-gcp:gpuMaxNodes: 1
+  infra-gcp:gpuMachineType: "n1-standard-4"
+  infra-gcp:gpuZone1: {{ (datasource "cfg").GcpZone }}
+  infra-gcp:gpuZone2: {{ (datasource "cfg").GcpZone2 }}
+  infra-gcp:globalStack: {{ (datasource "cfg").StackName }}

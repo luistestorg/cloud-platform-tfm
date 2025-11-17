@@ -1,0 +1,6 @@
+config:  
+  gcp:project: {{ (datasource "cfg").GcpProject }}
+  infra-kube:project: {{ (datasource "cfg").GcpProject }}
+  infra-kube:tls:
+    acmeServer: https://acme-v02.api.letsencrypt.org/directory
+  infra-kube:globalStack: {{ (datasource "cfg").StackName }}

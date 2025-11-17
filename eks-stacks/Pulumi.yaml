@@ -1,0 +1,3 @@
+name: nativelink-cloud
+runtime: go
+description: Bootstrap cloud infra for NativeLink

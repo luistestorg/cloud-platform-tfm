@@ -1,0 +1,129 @@
+replicaCount: 1
+nameOverride: "cloudwatch-metrics"
+fullnameOverride: "cloudwatch-metrics"
+podLabels:
+  node-role: "control-plane"
+priorityClassName: "system-cluster-critical"
+
+serviceMonitor:
+  enabled: true
+
+config: |-
+  apiVersion: v1alpha1
+  sts-region: us-east-2
+  discovery:
+    jobs:
+    - type: s3
+      regions: ["us-east-2"]
+      searchTags:
+        - key: nativelink
+          value: "true"
+      metrics:
+        - name: NumberOfObjects
+          statistics:
+            - Average
+          period: 86400
+          length: 172800
+          nilToZero: true
+        - name: BucketSizeBytes
+          statistics:
+            - Average
+          period: 86400
+          length: 172800
+          nilToZero: true
+        - name: AllRequests
+          statistics:
+            - Average
+          period: 300
+          length: 36000
+          nilToZero: true
+        - name: GetRequests
+          statistics:
+            - Sum
+          period: 300
+          length: 3600
+          nilToZero: true
+        - name: PutRequests
+          statistics:
+            - Sum
+          period: 300
+          length: 3600
+          nilToZero: true
+        - name: DeleteRequests
+          statistics:
+            - Sum
+          period: 300
+          length: 3600
+          nilToZero: true
+        - name: HeadRequests
+          statistics:
+            - Sum
+          period: 300
+          length: 3600
+          nilToZero: true
+        - name: PostRequests
+          statistics:
+            - Sum
+          period: 300
+          length: 3600
+          nilToZero: true
+        - name: SelectRequests
+          statistics:
+            - Sum
+          period: 300
+          length: 3600
+          nilToZero: true
+        - name: SelectScannedBytes
+          statistics:
+            - Sum
+          period: 300
+          length: 3600
+          nilToZero: true
+        - name: SelectReturnedBytes
+          statistics:
+            - Sum
+          period: 300
+          length: 3600
+          nilToZero: true
+        - name: ListRequests
+          statistics:
+            - Sum
+          period: 300
+          length: 3600
+          nilToZero: true
+        - name: BytesDownloaded
+          statistics:
+            - Sum
+            - Average
+          period: 300
+          length: 3600
+          nilToZero: true
+        - name: BytesUploaded
+          statistics:
+            - Sum
+            - Average
+          period: 300
+          length: 3600
+          nilToZero: true
+        - name: 4xxErrors
+          statistics:
+            - Sum
+          period: 300
+          length: 3600
+          nilToZero: true
+        - name: 5xxErrors
+          statistics:
+            - Sum
+          period: 300
+          length: 3600
+          nilToZero: true
+        - name: FirstByteLatency
+          statistics:
+            - p95
+          period: 300
+          length: 3600
+        - name: TotalRequestLatency
+          statistics:
+            - p95
+          period: 300
+          length: 3600

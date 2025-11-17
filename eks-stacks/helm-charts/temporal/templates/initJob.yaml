@@ -1,0 +1,40 @@
+#This job is used to execute temporal autoload routine 
+{{- if .Values.initJob.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "temporal-autosetup"
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "-5"
+spec:
+  template:
+    metadata:
+      name: "{{ .Release.Name }}"
+      labels:
+        app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+        app.kubernetes.io/instance: {{ .Release.Name | quote }}
+        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    spec:
+      containers:      
+      - name: pgsql-temporal-autosetup
+        image: {{ .Values.initJob.image }}
+        env:
+          - name: PGHOST
+            value: {{ .Values.initJob.pgHost }}
+          - name: PGPORT
+            value: {{ .Values.initJob.pgPort | quote }}
+          - name: PGUSER
+            value: {{ .Values.initJob.pgUser }}
+          - name: PGPASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.initJob.pgSecret | quote }}
+                key: {{ .Values.initJob.pgSecretKey }}
+      restartPolicy: Never
+{{- end }}

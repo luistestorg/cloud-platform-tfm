@@ -1,0 +1,83 @@
+global:  
+  prometheus:
+    enabled: false 
+    fqdn: "http://mon-prometheus.monitoring.svc:9090"
+
+  grafana:
+    enabled: false
+    domainName": "mon-grafana.monitoring.svc"
+    fqdn: "mon-grafana.monitoring.svc"
+    proxy: false
+
+serviceMonitor:
+  enabled: true
+
+networkCosts: 
+  enabled: true
+  tolerations:
+    - operator: Exists
+  prometheusScrape: true
+  priorityClassName: "system-cluster-critical"
+
+priority:
+  enabled: true
+  name: "system-cluster-critical" 
+
+kubecostToken: "bHVpc0B0cmFjZW1hY2hpbmEuY29txm343yadf98"
+
+kubecostFrontend:
+  deploymentStrategy:
+    type: Recreate
+
+kubecostDeployment:
+  deploymentStrategy:
+    type: Recreate
+
+prometheusRule:
+  enabled: true
+
+nodeSelector: 
+  kubernetes.io/arch: "amd64"
+  kubernetes.io/os: "linux"
+  node-role: "autoscaled-ondemand"
+
+service:  
+  tcpFrontend:
+    name: proxy
+    targetPort: 8888
+
+oauthContainer:
+  enabled: true
+  name: oauth2-proxy
+  image: "quay.io/oauth2-proxy/oauth2-proxy:v7.6.0"
+  imagePullPolicy: IfNotPresent
+  ports:
+    containerPort: 8888
+  envFrom:
+  - configMapRef:
+      name: oauth2-proxy-config-kubecost
+  - secretRef:
+      name: oauth2-proxy-client
+  livenessProbe:
+    failureThreshold: 3
+    httpGet:
+      path: /ping
+      port: 8888
+      scheme: HTTP
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 1
+  readinessProbe:
+    failureThreshold: 3
+    httpGet:
+      path: /ping
+      port: 8888
+      scheme: HTTP
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 1
+  args: 
+    -  --whitelist-domain=.amazoncognito.com
+  

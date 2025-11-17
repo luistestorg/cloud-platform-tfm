@@ -1,0 +1,7 @@
+name: mon-log
+runtime: go
+description: Pulumi Gcloud Microstack to manage monitoring and logging components
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: gcp-go

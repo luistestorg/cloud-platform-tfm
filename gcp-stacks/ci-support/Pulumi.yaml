@@ -1,0 +1,7 @@
+name: ci-support
+runtime: go
+description: Pulumi Gcloud Microstack to manage components that are not part of the other stacks
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: gcp-go

@@ -1,0 +1,9 @@
+dependencies:
+- name: kubescape-alert-crd
+  repository: file://./charts/clustered-crds
+  version: 0.0.1
+- name: kubescape-alert-crd-ns
+  repository: file://./charts/namespaced-crds
+  version: 0.0.1
+digest: sha256:50c7e538aca734433267ac06e6253c928ecd90c2242cd1c064690027e93c4abe
+generated: "2024-04-17T15:17:02.196975273Z"

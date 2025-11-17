@@ -1,0 +1,13 @@
+{
+  "index_patterns" : ["logs*","events*","otel-logs*"],
+  "priority" : 1000,
+  "allow_auto_create": true,
+  "template": {
+    "settings" : {
+      "number_of_shards" : 1,
+      "lifecycle": {
+            "name": "trace-ilcp"
+        }
+    }
+  }
+}

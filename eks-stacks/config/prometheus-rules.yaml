@@ -1,0 +1,178 @@
+# HPA scale UP rule
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name:  nativelink-ext.rules.kube-hpa-scale-up
+  namespace: monitoring
+  labels:
+    app: mon
+spec:
+  groups:
+  - name: nativelink-ext.kube-hpa-scale-up
+    rules:
+    - expr: |-
+        (kube_horizontalpodautoscaler_status_current_replicas {horizontalpodautoscaler="cas-hpa",namespace=~".*"} - 
+        kube_horizontalpodautoscaler_spec_min_replicas {horizontalpodautoscaler="cas-hpa",namespace=~".*"}) != 0
+      alert: KubeHPAScaleUp
+      annotations:
+        description: '{{ .Labels.horizontalpodautoscaler }} scaled up in the {{ .Labels.namespace }} namespace.'
+        summary: 'HPA {{ .Labels.horizontalpodautoscaler }} scaled up'
+      for: 5m
+      labels:
+        severity: warning
+---
+# worker ImagePullBackoff rule
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name:  nativelink-ext.rules.worker-imagepullbackoff
+  namespace: monitoring
+  labels:
+    app: mon
+spec:
+  groups:
+  - name: nativelink-ext.worker-imagepullbackoff
+    rules:
+    - expr: |-
+        kube_pod_container_status_waiting_reason{reason="ImagePullBackOff", container="worker"} == 1
+      alert: WorkerImagePullBackOff
+      annotations:
+        description: '{{ .Labels.pod }} in the {{ .Labels.namespace }} namespace is in ImagePullBackOff state.'
+        summary: 'Worker Pod is in ImagePullBackOff state'
+      for: 1m
+      labels:
+        severity: warning
+---
+# Pod CrashLoopBackOff rule
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name:  nativelink-ext.rules.crashloopbackoff
+  namespace: monitoring
+  labels:
+    app: mon
+spec:
+  groups:
+  - name: nativelink-ext.crashloopbackoff
+    rules:
+    - expr: |-
+        kube_pod_container_status_waiting_reason{reason="CrashLoopBackOff"} == 1
+      alert: PodCrashLoopBackOff
+      annotations:
+        description: '{{ .Labels.pod }} in the {{ .Labels.namespace }} namespace is in CrashLoopBackOff state.'
+        summary: 'Pod is in CrashLoopBackOff state'
+      for: 3m
+      labels:
+        severity: warning
+---
+# nginx loadbalancer
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name:  nativelink-ext.rules.nginx-loadbalancer-missing
+  namespace: monitoring
+  labels:
+    app: mon
+spec:
+  groups:
+  - name: nativelink-ext.nginx-loadbalancer-missing
+    rules:
+    - expr: |-
+        kube_service_spec_type{namespace="ingress-nginx",type="LoadBalancer"} != 1
+      alert: NginxLoadBalancerMissing
+      annotations:
+        description: 'The loadbalancer service for ingress-nginx is not available'
+        summary: 'Loadbalancer for nginx is missing!'
+      for: 1m
+      labels:
+        severity: critical
+---
+# Pending pods for more than 5 minutes
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name:  nativelink-ext.rules.pending-pods
+  namespace: monitoring
+  labels:
+    app: mon
+spec:
+  groups:
+  - name: nativelink-ext.pending-pods
+    rules:
+    - expr: |-
+        kube_pod_status_phase{namespace=~".*", phase="Pending"} == 1
+      alert: PodsPendingState
+      annotations:
+        description: '{{ .Labels.pod }} in the {{ .Labels.namespace }} namespace is in Pending state for more than 5 minutes.'
+        summary: 'Pod is in Pending state'
+      for: 5m
+      labels:
+        severity: warning
+---
+# Storage alert on PVCs
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name:  nativelink-ext.rules.storage-alert
+  namespace: monitoring
+  labels:
+    app: mon
+spec:
+  groups:
+  - name: nativelink-ext.storage-alert
+    rules:
+    - expr: |-
+        (100.0 * kubelet_volume_stats_used_bytes{namespace=~".*"}) /kubelet_volume_stats_capacity_bytes{namespace=~".*"} > 80
+      alert: PVCReachingUsageLimit
+      annotations:
+        description: '{{ .Labels.persistentvolumeclaim }} usage in the {{ .Labels.namespace }} namespace is higher than 80 percent.'
+        summary: 'PVC usage is higher than 80%'
+      for: 5m
+      labels:
+        severity: warning
+---
+# Redis pods restart
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name:  nativelink-ext.rules.redis-restart-alert
+  namespace: monitoring
+  labels:
+    app: mon
+spec:
+  groups:
+  - name: nativelink-ext.redis-restart-alert
+    rules:
+    - expr: |-
+        kube_pod_container_status_restarts_total{container="redis",namespace="nativelink-shared"} > 1 or
+        kube_pod_container_status_restarts_total{container="redis",namespace="nativelink-shared-mt"} > 1
+      alert: RedisRestartAlert
+      annotations:
+        description: 'Redis {{ .Labels.pod }} was restarted in the {{ .Labels.namespace }} namespace.'
+        summary: 'Redis pod was restarted'
+      for: 5m
+      labels:
+        severity: warning
+---
+# New Redis pods
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name:  nativelink-ext.rules.redis-new-pods-alert
+  namespace: monitoring
+  labels:
+    app: mon
+spec:
+  groups:
+  - name: nativelink-ext.redis-new-pods-alert
+    rules:
+    - expr: |-
+        (time() - kube_pod_created{ namespace="nativelink-shared", pod=~"redis-node-.*" } < 1800) or 
+        (time() - kube_pod_created{ namespace="nativelink-shared-mt", pod=~"redis-node-.*"} < 1800)
+      alert: RedisNewPodsAlert
+      annotations:
+        description: 'Redis {{ .Labels.pod }} was created  in the {{ .Labels.namespace }} namespace less than 30 minutes ago.'
+        summary: 'Redis new pod was created'
+      for: 5m
+      labels:
+        severity: warning

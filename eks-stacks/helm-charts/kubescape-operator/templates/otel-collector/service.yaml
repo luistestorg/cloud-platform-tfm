@@ -1,0 +1,20 @@
+{{- $components := fromYaml (include "components" .) }}
+{{- if $components.otelCollector.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.otelCollector.name }}
+  namespace: {{ .Values.ksNamespace }}
+  labels:
+    app: {{ .Values.otelCollector.name }}
+    kubescape.io/ignore: "true"
+spec:
+  type: ClusterIP
+  ports:
+    - name: otlp
+      port: 4317
+      targetPort: 4317
+      protocol: TCP
+  selector:
+    app: {{ .Values.otelCollector.name }}
+{{ end }}

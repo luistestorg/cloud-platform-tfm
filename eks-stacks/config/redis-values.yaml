@@ -1,0 +1,71 @@
+architecture: replication
+auth:
+  enabled: false
+  sentinel: false
+fullnameOverride: redis
+useHostnames: false
+master:
+  extraFlags:
+    - --databases 1
+    - --maxmemory-policy allkeys-lru
+    - --maxmemory 58600mb
+  persistence:
+    size: 100Gi
+  podAntiAffinityPreset: "soft"
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+nameOverride: redis
+networkPolicy:
+  enabled: false
+pdb:
+  create: true
+  minAvailable: 1
+replica:
+  replicaCount: 3
+  podAntiAffinityPreset: "soft"
+  extraFlags:
+    - --databases 1
+    - --maxmemory-policy allkeys-lru
+    - --maxmemory 58600mb
+  persistence:
+    size: 100Gi
+    storageClass: gp3
+  startupProbe:
+    enabled: true
+    initialDelaySeconds: 20
+    periodSeconds: 10
+    timeoutSeconds: 10
+    successThreshold: 1
+    failureThreshold: 22
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 20
+    periodSeconds: 10
+    timeoutSeconds: 10
+    successThreshold: 1
+    failureThreshold: 7
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 20
+    periodSeconds: 10
+    timeoutSeconds: 10
+    successThreshold: 1
+    failureThreshold: 7
+sentinel:
+  enabled: true
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 20
+    periodSeconds: 10
+    timeoutSeconds: 10
+    successThreshold: 1
+    failureThreshold: 7
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 20
+    periodSeconds: 5
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 7

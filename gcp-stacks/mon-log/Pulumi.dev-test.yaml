@@ -1,0 +1,25 @@
+config:
+  gcp:project: native-link-cloud
+  mon-log:domain: dev-test.scdev.nativelink.net
+  mon-log:oauth2AuthUrl: "https://nativelink-dev.auth.us-west-2.amazoncognito.com/oauth2/authorize"
+  mon-log:oauth2ClientId: "41757fo07lp8h2619ia3moj4m1"
+  mon-log:oauth2GroupsClaim: "cognito:groups"
+  mon-log:oauth2TokenUrl: "https://nativelink-dev.auth.us-west-2.amazoncognito.com/oauth2/token"
+  mon-log:oauth2ValidateUrl: "https://nativelink-dev.auth.us-west-2.amazoncognito.com/oauth2/userInfo"
+  mon-log:oidcIssuerUrl: "https://cognito-idp.us-west-2.amazonaws.com/us-west-2_qaN8wa6M1"
+  mon-log:EnableElasticSearch: "true"
+  mon-log:ElasticSearchStorageClass: "standard"
+  mon-log:KibanaStorageClass: "standard"
+  mon-log:globalStack: dev-test
+  mon-log:oauth2ClientSecret:
+    secure: AAABALCrjlPBFWTUpakbQ9WZQRuhxvsyL9JqrVl6WtlIIDr50pgFveN2Fk6u4M6erf1Yb1HqF0fzUtlGNokT8VXsgqudGiWkChtRI7W9IvkQfmI=
+  mon-log:oauth2CookieSecret:
+    secure: AAABAE88WsHViXnKibDYUWpm+jQzrDdbLXUuJF0SndeL/rMlSz9c5Duf4Xzal/K+UDf5wM7nTogJG5phaXpjqA==
+  mon-log:grafanaAdminPassword:
+    secure: AAABAJIebZeCwXJNjSJgRGBdKL3WcJstvYsgJgQnU392so7/JICZTMpKR3OmJx/aULl/cEIsvEy5Y5At03vAiA==
+  mon-log:bootstrapAdminPassword:
+    secure: AAABAGIYJd2UIiBO+iLI6xX81/a42u53GQrSTXOUEF/TArrWq3/XAVf2Ab1dWTa+eTdqN5SUh/8pRFVV4KMgXw==
+  mon-log:elasticSearchPassword:
+    secure: AAABAAHqYB7rIEq0GbD6RkvdAxFDkY1bqAG++ctbhmVXLO/lXq6flILvedutUydjASMg3s6jD4zqIlZ4cVtPwQ==
+  mon-log:kibanaPassword:
+    secure: AAABACZN6e1QDOSSukwfjzB4s3xI2e11xintu3MrEvycqkel9W5EcrAPRCxWaotsN7RrTFhV9S1I9yeFnjR2gw==

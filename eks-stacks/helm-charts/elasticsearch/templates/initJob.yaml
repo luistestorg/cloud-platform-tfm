@@ -1,0 +1,64 @@
+#This job is used to create the index templates and index lifecycle policy once the chart has been installed or ugpraded
+{{- if .Values.initJob.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "elastic-index-init"
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+  annotations:
+    "helm.sh/hook": post-install, post-upgrade	
+    "helm.sh/hook-weight": "-5"
+spec:
+  template:
+    metadata:
+      name: "{{ .Release.Name }}"
+      labels:
+        app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+        app.kubernetes.io/instance: {{ .Release.Name | quote }}
+        helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    spec:
+      initContainers:
+      - name: policy-creator
+        image: "curlimages/curl:8.11.1"
+        command:
+        - curl
+        args: ["-s", "-k", "-X", "PUT", "https://$(SERVICE_NAME):9200/_ilm/policy/trace-ilcp", "-H", "Content-Type: application/json", "-d",  "@/data/create_es_lc_policy.json"]
+        volumeMounts:
+        - mountPath: /data/
+          name: data
+        env:
+          - name: SERVICE_NAME
+            value: {{ include "elasticsearch.service.name" . }}
+      containers:      
+      - name: index-template-creator
+        image: "curlimages/curl:8.11.1"
+        command:
+        - curl
+        args: ["-s", "-k", "-X", "PUT", "https://$(SERVICE_NAME):9200/_index_template/trace-it", "-H", "Content-Type: application/json", "-d",  "@/data/create_es_index_template.json"]
+        volumeMounts:
+        - mountPath: /data/
+          name: data
+        env:
+          - name: SERVICE_NAME
+            value: {{ include "elasticsearch.service.name" . }}
+      volumes:
+        - name: "data"
+          configMap:
+            name: "elastic-init-files"
+            items:
+              - key: "create_es_lc_policy.json"
+                path: "create_es_lc_policy.json"
+              - key: "create_es_index_template.json"
+                path: "create_es_index_template.json"
+      restartPolicy: Never
+     {{- if .Values.nodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" (dict "value" .Values.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.tolerations "context" $) | nindent 8 }}
+      {{- end }}
+{{- end }}

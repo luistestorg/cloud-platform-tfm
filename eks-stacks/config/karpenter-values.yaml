@@ -1,0 +1,14 @@
+nameOverride: "karpenter"
+fullnameOverride: "karpenter"
+replicas: 1
+serviceAccount:
+  create: true
+  name: "karpenter"
+podLabels:
+  node-role: "control-plane"
+additionalClusterRoleRules:
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    verbs: ["*"]
+serviceMonitor:
+  enabled: true

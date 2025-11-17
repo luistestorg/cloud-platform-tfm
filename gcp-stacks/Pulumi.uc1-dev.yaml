@@ -1,0 +1,9 @@
+config:
+  gcp:project: native-link-cloud
+  gcp-stack:project: native-link-cloud
+  gcp-stack:region: us-central1
+  gcp-stack:vpcName: uc1-dev
+  gcp-stack:clusterName: uc1-dev
+  gcp-stack:env: dev
+  #Check cluster current version to avoid cluster recreation because GKE updates the value
+  gcp-stack:kubeVersion: 1.31.8-gke.1045000

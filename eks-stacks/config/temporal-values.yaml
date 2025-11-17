@@ -1,0 +1,65 @@
+nameOverride: "temporal"
+fullnameOverride: "temporal"
+
+server:
+  enabled: true
+  metrics:
+    serviceMonitor:
+      enabled: true
+
+  podLabels:
+    node-role: "control-plane"
+
+  config:
+    logLevel: "debug,info"
+
+    # IMPORTANT: This value cannot be changed, once it's set.
+    numHistoryShards: 512
+
+    persistence:
+      defaultStore: default
+      additionalStores: {}
+
+      default:
+        driver: "sql"
+        sql:
+          driver: "postgres"
+          port: 5432
+          database: "temporal"
+          tls:
+            enabled: true
+            enableHostVerification: false
+
+      visibility:
+        driver: "sql"
+        sql:
+          driver: "postgres"
+          port: 5432
+          database: "temporal_visibility"
+          tls:
+            enabled: true
+            enableHostVerification: false
+
+postgresql:
+  enabled: true
+
+elasticsearch:
+  enabled: false
+
+prometheus:
+  enabled: false
+
+grafana:
+  enabled: false
+
+cassandra:
+  enabled: false
+
+mysql:
+  enabled: false
+
+schema:
+  setup:
+    enabled: true
+  update:
+    enabled: false

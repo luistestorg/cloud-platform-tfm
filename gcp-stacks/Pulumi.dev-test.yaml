@@ -1,0 +1,8 @@
+config:
+  gcp:project: native-link-cloud
+  gcp-stack:project: native-link-cloud
+  gcp-stack:region: us-central1
+  gcp-stack:vpcName: dev-test
+  gcp-stack:clusterName: dev-test
+  gcp-stack:env: dev
+  gcp-stack:kubeVersion: 1.28.15-gke.1480000

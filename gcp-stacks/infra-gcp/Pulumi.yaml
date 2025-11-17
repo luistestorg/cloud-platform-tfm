@@ -1,0 +1,7 @@
+name: infra-gcp
+runtime: go
+description: Pulumi Gcloud MicroStack for managing GCP infra resources
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: gcp-go

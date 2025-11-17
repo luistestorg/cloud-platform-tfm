@@ -1,0 +1,13 @@
+config:
+  gcp:project: {{ (datasource "cfg").GcpProject }}
+  mon-log:domain: {{ (datasource "cfg").ClusterDomain }}
+  mon-log:oauth2AuthUrl: "https://nativelink-dev.auth.us-west-2.amazoncognito.com/oauth2/authorize"
+  mon-log:oauth2ClientId: "41757fo07lp8h2619ia3moj4m1"
+  mon-log:oauth2GroupsClaim: "cognito:groups"
+  mon-log:oauth2TokenUrl: "https://nativelink-dev.auth.us-west-2.amazoncognito.com/oauth2/token"
+  mon-log:oauth2ValidateUrl: "https://nativelink-dev.auth.us-west-2.amazoncognito.com/oauth2/userInfo"
+  mon-log:oidcIssuerUrl: "https://cognito-idp.us-west-2.amazonaws.com/us-west-2_qaN8wa6M1"
+  mon-log:EnableElasticSearch: "true"
+  mon-log:ElasticSearchStorageClass: "standard"
+  mon-log:KibanaStorageClass: "standard"
+  mon-log:globalStack: {{ (datasource "cfg").StackName }}

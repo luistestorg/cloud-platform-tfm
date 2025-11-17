@@ -1,0 +1,258 @@
+luaScripts:
+  functions.lua: |
+    function set_fields(tag, timestamp, record)
+          local kube = record['log']['kubernetes']
+          if (kube ~= nil) then
+              record['host'] = record['log']['kubernetes']['host']
+              record['log']['kubernetes']['host'] = nil
+              record['pod_name'] = record['log']['kubernetes']['pod_name']
+              record['namespace'] = record['log']['kubernetes']['namespace_name']
+              local node = record['log']['Node']
+              if (node ~= nil) then
+                  record['node_name'] = node['name']
+                  record['log']['Node']['name'] = nil
+              end
+              record['log']['kubernetes']['pod_name'] = nil
+              record['log']['kubernetes']['namespace_name'] = nil
+          else
+              output = "invalid: " .. tag .. ":  [" .. string.format("%f", timestamp) .. ", { "
+              for key, val in pairs(record) do
+                  output = output .. string.format(" %s => %s,", key, val)
+              end
+              output = string.sub(output,1,-2) .. " }]"
+              print(output)
+
+              return -1, timestamp, record
+          end
+
+          local level = record['log']['level']
+          if (level ~= nil and level ~= '') then
+              record['severity'] = string.lower(level)
+          else
+              record['severity'] = 'info'
+          end
+
+          record['message'] = ''
+          local msg = record['log']['msg']
+          if (msg ~= nil and msg ~= '') then
+              record['message'] = record['message'] .. msg
+          end
+
+          local log = record['log']['log']
+          if ( log ~= nil and log ~= '') then
+            if type(log) == "table" then
+              for key, val in pairs(log) do
+                if type(val) == "table" then
+                  record['message'] = record['message'] .. json.encode(val)
+                else
+                  record['message'] = record['message'] .. val
+                end
+              end
+            else
+              record['message'] = record['message'] .. log
+            end
+          end
+
+          local message = record['log']['message']
+          if (message ~= nil and message ~= '') then
+              record['message'] = record['message'] .. message
+          end
+
+          local fields = record['log']['fields']
+          if (fields ~= nil) then
+              local target = record['log']['target']
+              if (target ~= nil and target ~= '') then
+                  record['message'] = target .. ' ' .. record['message']
+              end
+
+              local fmsg = record['log']['fields']['message']
+              if (fmsg ~= nil and fmsg ~= '') then
+                  record['message'] = record['message'] .. fmsg
+              end
+
+              local raddr = record['log']['fields']['remote_addr']
+              if (raddr ~= nil and raddr ~= '') then
+                  record['message'] = record['message'] .. ' (' .. raddr .. ')'
+              end
+          end
+
+          record['log']['span'] = nil
+          record['log']['spans'] = nil
+
+          local log_service = record['log']['service']
+          if log_service ~= nil then
+            if type(log_service) == "table" then
+              for key, val in pairs(log_service) do
+                if type(val) == "table" then
+                  record['message'] = record['message'] .. json.encode(val)
+                else
+                  record['message'] = record['message'] .. val
+                end
+              end
+            else
+              record['message'] = record['message'] .. log_service
+            end
+          end
+
+          local recordMessage = record['message']
+          if (recordMessage == nil or recordMessage == '' or recordMessage == 'none') then
+              local uri = record['log']['uri']
+              local method = record['log']['method']
+              local status = record['log']['status']
+              local latencyMs = record['log']['latency_human']
+              if (uri ~= nil and method ~= nil and status ~= nil) then
+                  record['message'] = method .. ' ' .. uri .. ' ' .. status .. ' (' .. latencyMs .. ')'
+              end
+          end
+
+          if (record['namespace'] == 'ingress-nginx') then
+              local remote_addr = record['log']['remote_addr']
+              record['ing_remote_addr'] = remote_addr
+              record['ing_user_agent'] = record['log']['user_agent']
+              record['ing_request_size'] = record['log']['request_size']
+              record['ing_response_size'] = record['log']['response_size']
+              record['ing_uri'] = record['log']['path']
+              record['ing_method'] = record['log']['method']
+              record['ing_host'] = record['log']['host']
+              record['ing_status'] = record['log']['status_code']
+              record['ing_time'] = record['log']['time']
+              record['ing_namespace'] = record['log']['ingress_namespace']
+              record['ing_ingress'] = record['log']['ingress']
+
+              local host = record['log']['host']
+              local uri = record['log']['path']
+              local method = record['log']['method']
+              local status = record['log']['status_code']
+              local latencyMs = record['log']['time']
+              if (status ~= nil) then
+                record['message'] = method .. ' from ' .. remote_addr .. ' to ' .. host .. ' ' .. uri .. ' ' .. status .. ' (took ' .. latencyMs .. 's)'
+              end
+
+              record['log']['time'] = record['log']['timestamp']             
+
+          end
+
+          if (record['message'] == nil or record['message'] == '' or record['message'] == 'none') then
+              return -1, timestamp, record
+          end
+
+          return 2, timestamp, record
+    end
+
+    function set_event_fields(tag, timestamp, record)
+          if (record['type'] ~= nil) then
+              record['event_type'] = record['type']
+          end
+
+          if (record['reason'] ~= nil) then
+              record['message'] = record['reason'] .. ': ' .. record['message']
+          end
+
+          if (record['reportingInstance'] ~= nil and record['reportingInstance'] ~= '') then
+              record['host'] = record['reportingInstance']
+          end
+
+          if (record['metadata'] ~= nil) then
+              record['pod_name'] = record['metadata']['name']
+              record['namespace'] = record['metadata']['namespace']
+          end
+
+          if (record['involvedObject'] ~= nil and record['involvedObject']['kind'] ~= nil and record['involvedObject']['kind'] ~= 'Pod') then
+              record['pod_name'] = record['involvedObject']['kind'] .. ': ' .. record['pod_name']
+          end
+          if (record['involvedObject'] ~= nil and record['involvedObject']['ownerReferences'] ~= nil and record['involvedObject']['ownerReferences']['name'] ~= nil) then
+              record['ownerName'] = record['involvedObject']['ownerReferences']['name']
+          end
+          if (record['involvedObject'] ~= nil and record['involvedObject']['labels'] ~= nil and record['involvedObject']['labels']['helm_sh/chart'] ~= nil) then
+              record['chartName'] = record['involvedObject']['labels']['helm_sh/chart']
+          end
+          if (record['involvedObject'] ~= nil and record['involvedObject']['labels'] ~= nil and record['involvedObject']['labels']['beta_kubernetes_io/instance-type'] ~= nil) then
+              record['instanceType'] = record['involvedObject']['labels']['beta_kubernetes_io/instance-type']
+          end
+
+          new_record = {}
+          new_record['host'] = record['host']
+          new_record['pod_name'] = record['pod_name']
+          new_record['namespace'] = record['namespace']
+          new_record['event_type'] = record['event_type']
+          new_record['message'] = record['message']
+          new_record['ownerName'] = record['ownerName']
+          new_record['chartName'] = record['chartName']
+          new_record['instanceType'] = record['instanceType']
+          new_record['reason'] = record['reason']
+
+
+          return 2, timestamp, new_record
+    end
+
+config:
+  inputs: |
+    [INPUT]
+        Name tail
+        Path /var/log/containers/*.log
+        Exclude_Path /var/log/containers/*fluentbit*.log,/var/log/containers/*crossplane*.log,/var/log/containers/*cilium*.log,/var/log/containers/event-exporter*.log,/var/log/containers/*cas*.log,/var/log/containers/*scheduler*.log,/var/log/containers/*bep-etl*.log,/var/log/containers/*worker-provisioner*.log,/var/log/containers/*web-ui*.log,/var/log/containers/*bridge-*.log,/var/log/containers/*otc-*.log
+        multiline.parser docker, cri
+        Tag kube.*
+        Mem_Buf_Limit 10MB
+        Skip_Long_Lines On
+
+    [INPUT]
+        Name tail
+        Path /var/log/pods/*/*/*.log
+        Exclude_Path /var/log/pods/*cas-*/*/*.log,/var/log/pods/*scheduler-*/*/*.log,/var/log/pods/*bep-etl-*/*/*.log,/var/log/pods/*web-ui-*/*/*.log,/var/log/pods/*worker-provisioner-*/*/*.log,/var/log/pods/*bridge-*/*/*.log,/var/log/pods/*opentelemetry-kube-stack-*/*/*.log
+        multiline.parser docker, cri
+        Tag kube.*
+        Mem_Buf_Limit 10MB
+        Skip_Long_Lines On
+
+    [INPUT]
+        Name tail
+        Path /var/log/containers/event-exporter*.log
+        multiline.parser docker, cri
+        Tag events
+        Mem_Buf_Limit 2MB
+        Skip_Long_Lines Off
+
+    [INPUT]
+        Name systemd
+        Tag host.*
+        Systemd_Filter _SYSTEMD_UNIT=kubelet.service
+        Read_From_Tail On
+
+  filters: |
+    [FILTER]
+        Name kubernetes
+        Match kube.*
+        Merge_Log On
+        Keep_Log Off
+        Labels Off
+        Annotations Off
+        K8S-Logging.Parser On
+        K8S-Logging.Exclude On
+
+    [FILTER]
+        Name nest
+        Match kube.*
+        Operation nest
+        Wildcard *
+        Nest_under log
+
+    [FILTER]
+        Name lua
+        Match kube.*
+        script /fluent-bit/scripts/functions.lua
+        call set_fields
+
+    [FILTER]
+        Name         parser
+        Parser       docker
+        Match        events
+        Key_Name     log
+        Reserve_Data On
+        Preserve_Key On
+
+    [FILTER]
+        Name lua
+        Match events
+        script /fluent-bit/scripts/functions.lua
+        call set_event_fields

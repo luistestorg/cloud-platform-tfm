@@ -1,0 +1,61 @@
+{
+  "spec": {
+    "disruption": {
+      "consolidationPolicy": "WhenUnderutilized",
+      "expireAfter": "Never"
+    },
+    "template": {
+      "metadata": {
+        "labels": {
+          "eks.amazonaws.com/capacityType": "ON_DEMAND",
+          "node-role": "autoscaled-ondemand",
+          "nvidia.com/gpu": "present"
+        }
+      },
+      "spec": {
+        "nodeClassRef": {
+          "name": "default-ec2-nodeclass"
+        },
+        "requirements": [
+          {
+            "key": "karpenter.k8s.aws/instance-family",
+            "operator": "In",
+            "values": [
+              "g5"
+            ]
+          },
+          {
+            "key": "karpenter.k8s.aws/instance-size",
+            "operator": "In",
+            "values": [
+              "xlarge",
+              "2xlarge",
+              "4xlarge"
+            ]
+          },
+          {
+            "key": "karpenter.sh/capacity-type",
+            "operator": "In",
+            "values": [
+              "spot","on-demand"
+            ]
+          },
+          {
+            "key": "kubernetes.io/arch",
+            "operator": "In",
+            "values": [
+              "amd64"
+            ]
+          }
+        ],
+        "taints": [
+          {
+            "effect": "NoSchedule",
+            "key": "nvidia.com/gpu",
+            "value": "present"
+          }
+        ]
+      }
+    }
+  }
+}

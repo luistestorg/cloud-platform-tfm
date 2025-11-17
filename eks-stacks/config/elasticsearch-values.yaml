@@ -1,0 +1,43 @@
+fullnameOverride: "elasticsearch"
+
+global:
+  kibanaEnabled: true
+  defaultStorageClass: "gp3-enc"
+
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    namespace: "monitoring"
+
+extraConfig:
+  xpack.security.authc:
+    anonymous:
+      username: anonymous_user 
+      roles: superuser
+      authz_exception: false 
+initJob:
+  enabled: true
+kibana:  
+  persistence: 
+    enabled: false
+  autoloadService:
+    ports:
+      name: "https"
+      targetPort: 5601
+      port: 5601
+      protocol: "TCP"
+  updateStrategy:
+    type: Recreate
+  metrics:
+    enabled: true
+    serviceMonitor:
+        enabled: true
+        namespace: "monitoring"
+  service:
+    ports:
+      name: "proxy"
+      targetPort: 8888
+  extraEnvVars:
+    - name: "NODE_OPTIONS"
+      value: "--max_old_space_size=4096"

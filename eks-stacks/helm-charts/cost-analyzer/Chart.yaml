@@ -1,0 +1,10 @@
+annotations:
+  artifacthub.io/links: |
+    - name: Homepage
+      url: https://www.kubecost.com
+apiVersion: v2
+appVersion: 2.4.2
+description: Kubecost Helm chart - monitor your cloud costs!
+icon: https://raw.githubusercontent.com/kubecost/.github/9602bea0c06773da66ba43cb9ce5e1eb2b797c32/kubecost_logo.png
+name: cost-analyzer
+version: 2.4.2-3

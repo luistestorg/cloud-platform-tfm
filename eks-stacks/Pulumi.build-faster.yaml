@@ -1,0 +1,104 @@
+config:
+  aws:profile: tm
+  aws:region: us-east-2
+  aws:skipMetadataApiCheck: "false"
+  nativelink-cloud:alertWebhookUrl:
+    secure: AAABAOeKuBOfcT62LSUJUhWhcMwtiOm8m17ckvgwS3sHkJYrae8xedu7eOgzon0DzBjJ7WEr5x/CQJJ3vIeehFm5joy6N5mG1ZMcG68BT6RPeGoqLY7Zqb9KXOQIRoWCTZYr78W1+1xl/lhyEcHrDq0=
+  nativelink-cloud:bootstrapAdminPassword:
+    secure: AAABAH5xcP+sgULGWlF0WDhmxx1DmV6X7FMbGGWTXaVOoiCHGfQxEk/i/HYhXacIu8oNz2yT/6pEMCcfeL8pSA==
+  nativelink-cloud:cachePassword:
+    secure: AAABAOe4V4c83AdvzvSlc06Xb6klG+KDJpCBxjpwNBl5IwvU6PaXrBNGxuyUPgNLahx0ZgZVy0/aN7d4jDXX7w==
+  nativelink-cloud:dbOffsiteBackupGCSKey:
+    secure: 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
+  nativelink-cloud:dbPassword:
+    secure: AAABAOtOyiEhzLYrQ99t/DGAoDFqY6AaCNuDzfEyfp2LgRt060pI6CL6NEa9Akwy/3HN71+PeXMxZydU8J43mQ==
+  nativelink-cloud:elasticSearchPassword:
+    secure: AAABAJkkQVj+khkM4xK4LLVxwVHA6punEH2401xJWCN0USd5KKVUnXwJHx9W8yd5ZbtFRjd6Cm0RqGDDVt9nDA==
+  nativelink-cloud:kibanaPassword:
+    secure: AAABALOAXdvXK+bvu2rh85A2Nqbybm0Do5TUxs/+qxwhvwQ6u/O3RnhoW12Ft+/veq6A7eGNatFHYxLW1JzmeA==
+  nativelink-cloud:mon:
+    EnableElasticSearch: true
+    ElasticSearchStorageClass: gp3-enc
+    KibanaStorageClass: gp3-enc
+    enableLogStack: true
+    enableOTEL: false
+    prometheusReplicas: 2
+    prometheusCpuRequests: "4000m"
+    prometheusMemoryRequests: "20Gi"
+    prometheusStorage: 100Gi
+    prometheusStorageClass: "gp3-8k-iops-enc"
+    prometheusStorageSnapshot: "prom-pvc-snapshot"
+  nativelink-cloud:eks:
+    awsAccountId: "299166832260"
+    awsAuthIamAdminRole: eks-kubectl-prod-access # added to the aws-auth configmap to allow 'cluster-admin' kubectl access via IAM role
+    awsAuthIamReadOnlyRole: eks-kubectl-access # added to the aws-auth configmap to allow 'read-only' kubectl access via IAM role
+    clusterName: build-faster
+    controlPlaneInstanceType: m6i.large
+    createRunbooksNamespace: true
+    createSharedNativeLinkNamespace: true
+    enableCilium: false
+    enableMongoDB: true
+    enableRedisCluster: false
+    enableKubeCost: true
+    enableNats: true
+    kubecostPvcSnapshot: "kubecost-data-pvc-snap"
+    env: "prod"
+    k8sVersion: "1.28"
+    karpenterSpotToSpotConsolidation: false
+    mongoExistingClaim: "mdb" # don't copy this forward to other clusters
+    mongoStorageClass: "gp3-8k-iops-enc" # don't copy this forward to other clusters, use default: gp3-8k-iops-enc
+    mtRedisSize: "large"
+    mtRedisZone: "us-east-2c"
+    sharedRedisSize: "xlarge"
+    sharedRedisStorageClass: "gp3" # don't copy this forward to other clusters, use default: gp3-8k-iops-enc
+    sharedRedisZone: "us-east-2c"
+    vpcFlowLogsEnabled: true
+    vpcName: build-faster-eks
+    workerNodeAmiId: ami-035d6145fa0566e84 #Encrypted AMI amazon-eks-node-1.28-v20240424-encrypted    
+  nativelink-cloud:grafanaAdminPassword:
+    secure: AAABAI63B6cvlyO1Eq5ml7Et8M04MiR0fHeopseHmm7Ji720vUeqLJeSQ02b4SLoOH8SlF93nLbzxvgQpBsIww==
+  nativelink-cloud:mongoDatabasePassword:
+    secure: AAABAJIj5J/PhUT33ZhcPtQ8ADkDlPMe/VZ8PvmYvTqpIP5iCsoe0z3f67mhIZltdgAVNgiS/tJHvVKveFeIgw==
+  nativelink-cloud:mongoRootPassword:
+    secure: AAABAET6I1ETNAd7yT3BCn8jcMPL/UhJBdBlMyC85S8x1rz5lTOJsyd8JaN4dBKFQMMyY0p42hjIOVoG9kN7jw==
+  nativelink-cloud:oauth2ClientSecret:
+    secure: AAABAEoRrjWqhJalRn24xacX4uf7wOMULySi+UCb9ETsPO0kiIxuHI0q7dRSFNo0mIt+IDRLCUSxlLlvcMnWI7XHbK6CJgbzRUkxEdFCniveYfgn
+  nativelink-cloud:oauth2CookieSecret:
+    secure: AAABAGMWZbCNPVAa2XYqxkaBNuMU7gO0njcmhj9+CJBSkr0x77Fo0C41tl77uo20xUIEcwfHQK0y4gisRODWBg==
+  nativelink-cloud:pgPassword:
+    secure: AAABAJhxf4QdYwzknqZu3EZzPnrcrXVlN088u8DH97M4tgb6vQqztWAtw7eY+Fj0Dd5byJ1qf9lsquCMAl0SPw==
+  nativelink-cloud:segmentApiWriteKey:
+    secure: AAABAJoHcwePTLls8UJ5otwNyJaSKRLofdvDf0Z1CpTOdMnbDfOWbtpvM663QvZuWFBAiZ0PWOS5UuFix4ppxQ==
+  nativelink-cloud:selfServiceApi:
+    apiEnabled: true
+    nativeLinkImage: "ghcr.io/tracemachina/nativelink:db22y8nkyyly28ikw4x40qlh8273mw9g"
+    apiImage: "299166832260.dkr.ecr.us-east-2.amazonaws.com/nativelink-api:latest"
+    dbOffsiteBackupBucket: "gs://nativelink-offsite-db-backups/build-faster"
+    dbOffsiteBackupProject: "native-link-cloud"
+    dbOffsiteBackupServiceAccount: "gcs-backup@native-link-cloud.iam.gserviceaccount.com"
+    enableTemporal: true
+    rdsInstanceType: db.t4g.medium
+    rdsStorage: 40
+    sqlZone: "us-east-2b"
+    segmentApiEnabled: true
+    enableSlackNotifications: true
+    slackChannelForAlerts: "cloud-platform-notifications"
+    changelogTip: "build-faster"
+    nativeLinkDbEnabled: false
+  nativelink-cloud:oauthConfig:
+    oauth2AuthUrl: "https://nativelink.auth.us-east-2.amazoncognito.com/oauth2/authorize"
+    oauth2ClientId: "1mkfc64irkbhvaann4o701f87"
+    oauth2GroupsClaim: "cognito:groups"
+    oauth2TokenUrl: "https://nativelink.auth.us-east-2.amazoncognito.com/oauth2/token"
+    oauth2ValidateUrl: "https://nativelink.auth.us-east-2.amazoncognito.com/oauth2/userInfo"
+    oidcIssuerUrl: "https://cognito-idp.us-east-2.amazonaws.com/us-east-2_EuxT2H2ua"
+  nativelink-cloud:sharedCachePassword:
+    secure: AAABAOstKW3NQ2JeD5OhqxtQWiMErYtx5EQ8kf3zYeIkNmv3CCLP4hcRXP60ujHcjDCqdHURPLJDxj8v2h+jFw==
+  nativelink-cloud:slackWebhookUrl:
+    secure: AAABAN/edY6QDq0bagoearafM+Oo9mKzc4Gv/Kfwk3WXEJlnf701lGX+1hh4V+/7hsACo+lfO+eqTEltv2Emj8u2mY3NUSvBcSWJtlcKggvkAi8WZT534CFgdaPzjjhZb4TY/P3peayG9IHYf4Pi9JU=
+  nativelink-cloud:tls:
+    acmeServer: https://acme-v02.api.letsencrypt.org/directory
+    domain: build-faster.nativelink.net
+    route53ZoneId: Z074895928H8N8A6C12XU
+  nativelink-cloud:githubAuthToken:
+    secure: AAABAAP9Dqp0iIYqvVklMETo1KvP128HhyZIrXcP92s0yU5nga05IqNnljRZcJJj2oiumG67NynW+JCKtaT13akDFIG3YEdplJvvToouBT/7RilTfio0R88IHta4wvuPc8OeIHQwGdeHulWdhveizU2+BvMCGMf0c/R/U6A=

@@ -1,0 +1,52 @@
+{
+  "spec": {
+    "disruption": {
+      "consolidationPolicy": "WhenUnderutilized",
+      "expireAfter": "Never"
+    },
+    "template": {
+      "metadata": {
+        "labels": {
+          "eks.amazonaws.com/capacityType": "ON_DEMAND",
+          "node-role": "not-disruptable"
+        }
+      },
+      "spec": {
+        "taints": [
+          {
+            "key": "nativelink/not-disruptable",
+            "value": "true",
+            "effect": "NoSchedule"
+          }
+        ],
+        "nodeClassRef": {
+          "name": "default-ec2-nodeclass"
+        },
+        "requirements": [
+          {
+            "key": "karpenter.k8s.aws/instance-family",
+            "operator": "In",
+            "values": ["r7i","m7i","r6i","m6i","r7g","m7g","r6g","m6g"]
+          },
+          {
+            "key": "karpenter.k8s.aws/instance-size",
+            "operator": "In",
+            "values": ["large","xlarge","2xlarge","4xlarge"]
+          },
+          {
+            "key": "karpenter.sh/capacity-type",
+            "operator": "In",
+            "values": [
+              "on-demand"
+            ]
+          },
+          {
+            "key": "kubernetes.io/arch",
+            "operator": "In",
+            "values": ["amd64","arm64"]
+          }
+        ]
+      }
+    }
+  }
+}

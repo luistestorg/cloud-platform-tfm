@@ -1,0 +1,22 @@
+config:
+  gcp:project: native-link-cloud
+  nativelink-shared:shared:
+    createSharedNativeLinkNamespace: true
+    enableMongoDB: true
+    enableRedisCluster: false
+    enableNats: false
+    clusterRedisZone: us-central1
+    SharedRedisZone: us-central1-b
+    sharedRedisStorageClass: "standard"
+    clusterRedisSize: "large"
+  nativelink-shared:tls:
+    acmeServer: https://acme-v02.api.letsencrypt.org/directory
+    domain: uc1.scdev.nativelink.net
+    email: tim@tracemachina.com
+  nativelink-shared:mongoStorageClass: "standard"
+  nativelink-shared:mongoUseSts: "true"
+  nativelink-shared:globalStack: uc1-dev
+  nativelink-shared:mongoRootPassword:
+    secure: AAABAJ8KfrjzQTaNGn+r1Q3E8MDH8LsbNFVLab20My48tLomYw1+1gQ63q1PINBHmFRE5+SsznQ7FWK8l9n6xA==
+  nativelink-shared:mongoDatabasePassword:
+    secure: AAABAAf3SAl+6TCZIYPicdA9EWj/oX5K8eY4ovCXct3RgkPlmIq5fvq0FDvfSVIHarkX0EzUUAcXveqsk27rmA==

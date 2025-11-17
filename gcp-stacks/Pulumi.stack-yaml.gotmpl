@@ -1,0 +1,8 @@
+config:
+  gcp:project: {{ (datasource "cfg").GcpProject }}
+  gcp-stack:project: {{ (datasource "cfg").GcpProject }}
+  gcp-stack:region: {{ (datasource "cfg").GcpRegion }}
+  gcp-stack:vpcName: {{ (datasource "cfg").StackName }}
+  gcp-stack:clusterName: {{ (datasource "cfg").StackName }}
+  gcp-stack:env: {{ (datasource "cfg").Env }}
+  gcp-stack:kubeVersion: {{ (datasource "cfg").GkeVersion }}

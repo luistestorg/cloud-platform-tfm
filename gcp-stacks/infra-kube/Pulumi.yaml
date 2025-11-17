@@ -1,0 +1,7 @@
+name: infra-kube
+runtime: go
+description: Pulumi Gcloud Microstack to manage kube infra resources
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: gcp-go
