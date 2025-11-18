@@ -1,307 +1,1038 @@
-# Native Link EKS Cluster Bootstrap
+# EKS Stack - AWS EKS Cluster with Pulumi Micro-stacks
 
-## Prerequisites
+[![AWS](https://img.shields.io/badge/AWS-EKS-FF9900?logo=amazon-aws)](https://aws.amazon.com/eks/)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-1.28-326CE5?logo=kubernetes)](https://kubernetes.io/)
 
-Install the AWS cli and establish AWS creds, see:
-https://www.pulumi.com/docs/clouds/aws/get-started/begin/
+Micro-stack de Pulumi para aprovisionar y gestionar clústeres Amazon EKS con arquitectura modular. Este proyecto implementa Infrastructure as Code (IaC) utilizando Pulumi y Go, organizando la infraestructura en componentes independientes y reutilizables.
 
-On a Mac, do:
+## 📋 Tabla de Contenidos
+
+- [Arquitectura de Micro-stacks](#arquitectura-de-micro-stacks)
+- [Prerrequisitos](#prerrequisitos)
+- [Configuración del Proyecto](#configuración-del-proyecto)
+- [Despliegue](#despliegue)
+- [Acceso al Clúster](#acceso-al-clúster)
+- [Operaciones Comunes](#operaciones-comunes)
+- [Estructura de Micro-stacks](#estructura-de-micro-stacks)
+- [Troubleshooting](#troubleshooting)
+- [Mejores Prácticas](#mejores-prácticas)
+
+## 🏗️ Arquitectura de Micro-stacks
+
+El proyecto está organizado en micro-stacks independientes que se despliegan de forma secuencial:
+
 ```
+eks-stacks/
+├── infra-aws/       # Infraestructura AWS base (VPC, IAM, Security)
+├── infra-kube/      # Clúster EKS y node groups
+├── monitoring/      # Observabilidad (Prometheus, Grafana)
+├── networking/      # Ingress, CNI, certificados
+└── storage/         # Bases de datos y almacenamiento
+```
+
+### Dependencias entre Stacks
+
+```
+infra-aws (VPC, IAM, Security Groups)
+    ↓
+infra-kube (EKS Cluster + Node Groups)
+    ↓
+    ├── monitoring (Prometheus, Grafana, CloudWatch)
+    ├── networking (Ingress NGINX, Cilium, Cert-manager)
+    └── storage (Redis, MongoDB, RDS)
+```
+
+### Comunicación entre Stacks
+
+Los micro-stacks se comunican mediante `StackReference` de Pulumi, compartiendo outputs:
+
+```go
+// Ejemplo: monitoring/ consume outputs de infra-kube/
+infraKube := pulumi.NewStackReference(ctx, 
+    "organization/eks-stack-infra-kube/dev", nil)
+
+kubeconfig := infraKube.GetStringOutput(pulumi.String("kubeconfig"))
+clusterEndpoint := infraKube.GetStringOutput(pulumi.String("endpoint"))
+```
+
+## 📦 Prerrequisitos
+
+### Herramientas Requeridas
+
+- **AWS CLI** v2.x o superior
+- **Pulumi** v3.x o superior
+- **Go** 1.22 o superior
+- **kubectl** v1.28 o superior
+- **Helm** v3.x (opcional, para charts personalizados)
+
+### Instalación en macOS
+
+```bash
+# AWS CLI
 brew install awscli
+
+# Pulumi
+brew install pulumi
+
+# Go
+brew install go@1.22
+
+# kubectl
+brew install kubectl
+
+# Herramientas auxiliares (recomendadas)
+brew install kubectx      # Cambiar contextos de kubectl
+brew install k9s          # UI terminal para Kubernetes
+brew install stern        # Logs agregados de pods
 ```
 
-For working with Pulumi, you'll need an AWS profile named: `tm`:
+### Instalación en Linux (Ubuntu/Debian)
+
+```bash
+# AWS CLI
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+# Pulumi
+curl -fsSL https://get.pulumi.com | sh
+
+# Go
+sudo apt update
+sudo apt install golang-1.22
+
+# kubectl
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 ```
-[tm]
-region = us-east-2
+
+### Configuración AWS
+
+#### 1. Configurar Perfil AWS
+
+Crear/editar `~/.aws/config`:
+
+```ini
+[profile eks-admin]
+region = us-east-1
 output = json
 ```
 
-Verify:
-```
-aws sts get-caller-identity --profile tm
+#### 2. Agregar Credenciales
+
+Editar `~/.aws/credentials`:
+
+```ini
+[eks-admin]
+aws_access_key_id = YOUR_ACCESS_KEY_ID
+aws_secret_access_key = YOUR_SECRET_ACCESS_KEY
 ```
 
-If that doesn't work, then make sure you have the AWS access key and secret added to `~/.aws/credentials`, such as:
-```
-[tm]
-aws_access_key_id = ???
-aws_secret_access_key = ???
+#### 3. Verificar Configuración
+
+```bash
+aws sts get-caller-identity --profile eks-admin
 ```
 
-Install Pulumi / Go 1.22 if needed
-```
-brew update && brew upgrade pulumi
-brew install go@1.22
-```
-
-## EKS Clusters
-
-Currently, we have two long-lived clusters:
-* [build-faster](https://api.build-faster.nativelink.net) (Ohio: us-east-2): Production, hosts customer deployments
-* [dev-usw2](https://api.dev-usw2.nativelink.net) (Oregon: us-west-2): Staging / development
-
-Access to the Cloud Orchestrator API and Web console for these clusters is managed by AWS Cognito in the specific region.
-
-### Get kubectl access to dev-usw2 cluster
-
-You need to follow a very specific pattern for accessing our clusters using `kubectl`.
-
-First, go install `kubectx` and `kubens`; on a Mac:
-
-```
-brew install kubectx
-curl -sS https://webi.sh/kubens | sh
-```
-
-We also recommend [kube-ps1](https://github.com/jonmosco/kube-ps1), so you can see which cluster you're currently connected to in your shell prompt.
-
-Next, configure the `eks-access` profile in `~/.aws/config`:
-```
-[profile eks-access]
-source_profile=tm
-role_arn = arn:aws:iam::299166832260:role/eks-kubectl-access
-role_session_name = YOUR_NAME_HERE
-```
-_Note: the `source_profile` **MUST** be `tm` as that is the configured profile in our Pulumi stacks. The `role_session_name` helps differentiate you in the Kube API server audit logs since we're all coming through the same IAM role._
-
-Authenticate to the `dev-usw2` staging cluster:
-```
-aws eks --profile eks-access --region us-west-2 update-kubeconfig --name dev-usw2
-kubectx dev-usw2=.
-```
-
-This gives you **read-only** access (get / list) to all objects in the cluster.
-
-Verify you do not have full `cluster-admin` access (the following command should output `no`):
-```
-kubectl auth can-i "*" "*"
-```
-
-If you don't have access to the cluster, make sure your user ARN is added to the `eks-kubectl-access` IAM role trust relationships list (via AWS console).
-
-#### Break Glass Operation
-
-If you need to make manual changes to the cluster, you'll need to configure a "break glass" kubeconfig. 
-This process is intended to prevent you from accidentally updating the wrong cluster, such as changing prod when you thought you were pointing to your dev kind cluster.
-
-First, add your IAM user to the `eks-kubectl-dev-access` role using the AWS console (it may already be there).
-
-Verify you can assume that role:
-```
-aws sts assume-role --profile tm --role-arn arn:aws:iam::299166832260:role/eks-kubectl-dev-access --role-session-name kbg-test
-```
-_Note: you need to pass the `--profile tm` here since that profile resolves the AWS API access key and secret in the `~/.aws/credentials` file_
-
-Next, define another AWS profile named `eks-break-glass-dev` that assumes the `eks-kubectl-dev-access` IAM role with `source_profile=tm`:
-```
-[profile eks-break-glass-dev]
-source_profile=tm
-role_arn = arn:aws:iam::299166832260:role/eks-kubectl-dev-access
-role_session_name = kbg-YOUR_NAME_HERE
-```
-_Replace `YOUR_NAME_HERE` with your name, so we can differentiate users in the audit logs, such as `role_session_name = kbg-tim`_
-
-Next, you need to create a **kubeconfig**, but instead of writing it out to your `~/.kube/config` file, we're going to save it to a separate file that our `kbg` script references directly.
-```
-aws eks --profile eks-break-glass-dev --region us-west-2 update-kubeconfig --name dev-usw2 --kubeconfig=$HOME/.kube/breakglass
-```
-_Tip: Never use the `eks-break-glass-dev` profile to configure access to clusters added to your default `$HOME/.kube/config` configuration._
-
-To verify you have full `cluster-admin` access, run the following (should report `yes`):
-```
-KBG_CONTEXT=dev-usw2 hack/kbg auth can-i "*" "*"
-```
-Whenever you need to "break glass" to manually work on the cluster, use the `hack/kbg` script instead of `kubectl`.
-
-This is similar to using `sudo`, so please think before you type when using break glass mode.
-
-For PROD, the process is similar, except you use the following profile:
-```
-[profile eks-break-glass-prod]
-source_profile=tm
-role_arn = arn:aws:iam::299166832260:role/eks-kubectl-prod-access
-role_session_name = kbg-YOUR_NAME_HERE
-```
-Then add this cluster to your break glass kubeconfig
-```
-aws eks --profile eks-break-glass-prod --region us-east-2 update-kubeconfig --name build-faster --kubeconfig=$HOME/.kube/breakglass
-```
-Test:
-```
-KBG_CONTEXT=build-faster hack/kbg auth can-i "*" "*"
-```
-
-#### Namespace Admin for NativeLink Claims
-
-Use the [dev app](dev.nativelink.com) (or [Swagger UI](https://api.dev-usw2.nativelink.net/swagger/index.html#)) to deploy a NativeLink claim on the `dev-usw2` cluster if you don't already have one.
-This will create the `nativelink-<claimId>` namespace on the cluster.
-
-With [Kubernetes RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#kubectl-create-rolebinding), you can scope a ClusterRole, e.g. `cluster-admin`, to a specific namespace using a `RoleBinding` (instead of a `ClusterRoleBinding`). Thus, you have two basic options:
-1. Create a `RoleBinding` for yourself and other users if needed, or
-2. Create a `RoleBinding` for a group of users based on IAM role, e.g. `readonly`
-
-For option 1, create a `RoleBinding` in a specific namespace to grant one or more users `cluster-admin` (a Role) access (in that namespace only) where NativeLink is deployed:
-```
-cat <<EOF | KBG_CONTEXT=dev-usw2 hack/kbg create -n NAMESPACE -f -
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: nativelink-claim-admin
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
-subjects:
-- apiGroup: rbac.authorization.k8s.io
-  kind: User
-  name: USERNAME
-EOF
-```
-* _Notice we're using the `kbg` script to create the rolebinding_
-* _Replace `NAMESPACE` in the command with the actual namespace you want to create the role binding in_
-* _Replace `USERNAME` with your role session name (from `~/.aws/config`) prefixed by `readonly:`, e.g. `readonly:tim-test`_
-
-You can get your username by doing:
-```
-kubectl auth whoami | grep -i username | xargs | cut -d' ' -f2 -
-```
-
-Your username will be `readonly:<ROLE_SESSION_NAME>` based on how we mapped the `eks-kubectl-access` IAM Role in the `aws-auth` ConfigMap, i.e.
-```
-    - rolearn: arn:aws:iam::299166832260:role/eks-kubectl-access
-      username: readonly:{{SessionName}}
-      groups:
-        - readonly
-```
-
-For option 2, create a `RoleBinding` in a specific namespace to grant users in the `readonly` IAM role `cluster-admin` (a Role) access (in that namespace only) where NativeLink is deployed:
-
-```
-cat <<EOF | KBG_CONTEXT=dev-usw2 hack/kbg create -n NAMESPACE -f -
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: nativelink-claim-admin
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
-subjects:
-- apiGroup: rbac.authorization.k8s.io
-  kind: Group
-  name: readonly
-EOF
-```
-_Replace `NAMESPACE` in the command with the actual namespace you want to create the role binding in_
-_Note: this grants anyone in the `readonly` IAM role full access to your namespace (good for collaboration)_
-
-## Building a New Cluster
-
-### Prerequisites
-Choose a stack name, region, and domain name, configure in the `Pulumi.<stack>.yaml` (see Pulumi.example.yaml)
-
-Most of the configuration parameters are self-explanatory. Be sure to update the following cluster/region/zone specific settings:
-```
-config:
-  aws:region: us-west-2
-  nativelink-cloud:eks:
-    awsAccountId: "299166832260"
-    clusterName: build-test3
-    vpcName: build-test3
-  nativelink-cloud:selfServiceApi:
-    rdsZone: "us-west-2a"
-  nativelink-cloud:tls:
-    domain: build-test3.nativelink.net
-```
-
-Set up a domain name in Route53 if not using `nativelink.net`.
-
-Configure the OAuth2 settings in the stack YAML, e.g.
-```
-  nativelink-cloud:selfServiceApi:
-    apiEnabled: true
-    oauth2ClientId: "1mkfc64irkbhvaann4o701f87"
-    oauth2ValidateUrl: "https://nativelink.auth.us-east-2.amazoncognito.com/oauth2/userInfo"
-    oidcIssuerUrl: "https://cognito-idp.us-east-2.amazonaws.com/us-east-2_EuxT2H2ua"
-```
-_See Pulumi.build-faster.yaml for a complete example of OAuth2 settings_
-
-### Build the Cluster
-
-Login to Pulumi:
-```
-pulumi login
-```
-This should prompt you for an access token (get from Tim for now).
-
-Configure an OIDC Provider for the Self-Service API, such as AWS Cognito; you can get the Cognito OAuth2 secret from the AWS console for now.
-
-You'll need to set the OAuth2 client secret in an env var for the new stack using:
-```
-export OAUTH2_CLIENT_SECRET="???"
-```
-
-Once your stack config YAML is ready, run:
-```
-./pulumi-cli.sh init -s <STACK>
-```
-It can take up to 15 minutes to build out the cluster and dependencies.
-
-__Note: running `pulumi preview` for a yet to be created stack doesn't work because we wait to see the NLB to be provisioned, just run `./pulumi-cli.sh init -s <STACK>` and then you do `preview` or `refresh` after it completes.__
-
-After running `init` the first time, run `./pulumi-cli.sh up -s <STACK>` to apply any changes.
-
-Also, due to how Pulumi works, if the `init` fails, then you'll need to run `up` after correcting any errors, i.e. `init` is a one-time-shot kind of thing :(
-
-If you configured your stack with `apiEnabled: true`, be sure to update the redirect URL in the provider config (such as in AWS Cognito):
-```
-https://api.<YOUR_DOMAIN>/oauth2/callback
-```
-
-To connect to the EKS cluster using kubectl:
-```
-aws eks --profile <PROFILE> --region <REGION> update-kubeconfig --name <CLUSTER>
-```
-_Tip: the `./pulumi-cli.sh init -s <STACK>` script will do this for you if the provisioning process works correctly.
-
-### Alertmanager Integration with BetterStack
-
-If you're building a production cluster that needs on-call support, then you'll want to configure the BetterStack Webhook URL secret by doing:
-```
-pulumi config set --secret nativelink-cloud:alertWebhookUrl "https://uptime.betterstack.com/api/v1/prometheus/webhook/???"
-```
-_Get the value for `???` from the BetterStack Web console_
-
-### AWS Cognito Details
-
-For more information about the OAuth2 config for AWS Cognito for the `build-faster` stack:
-```
+**Output esperado:**
+```json
 {
-  "authorization_endpoint": "https://nativelink.auth.us-east-2.amazoncognito.com/oauth2/authorize",
-  "id_token_signing_alg_values_supported": [
-    "RS256"
-  ],
-  "issuer": "https://cognito-idp.us-east-2.amazonaws.com/us-east-2_EuxT2H2ua",
-  "jwks_uri": "https://cognito-idp.us-east-2.amazonaws.com/us-east-2_EuxT2H2ua/.well-known/jwks.json",
-  "response_types_supported": [
-    "code",
-    "token"
-  ],
-  "scopes_supported": [
-    "openid",
-    "email",
-    "phone",
-    "profile"
-  ],
-  "subject_types_supported": [
-    "public"
-  ],
-  "token_endpoint": "https://nativelink.auth.us-east-2.amazoncognito.com/oauth2/token",
-  "token_endpoint_auth_methods_supported": [
-    "client_secret_basic",
-    "client_secret_post"
-  ],
-  "userinfo_endpoint": "https://nativelink.auth.us-east-2.amazoncognito.com/oauth2/userInfo"
+    "UserId": "AIDACKCEVSQ6C2EXAMPLE",
+    "Account": "123456789012",
+    "Arn": "arn:aws:iam::123456789012:user/username"
 }
 ```
+
+## ⚙️ Configuración del Proyecto
+
+### 1. Inicializar Backend
+
+#### Opción A: Pulumi Cloud (Recomendado para producción)
+
+```bash
+# Login a Pulumi Cloud
+pulumi login
+
+# Verificar
+pulumi whoami
+```
+
+#### Opción B: Backend Local (Para desarrollo/testing)
+
+```bash
+# Configurar backend local
+export PULUMI_BACKEND_URL="file://${HOME}/.pulumi/local-eks"
+pulumi login
+
+# O usar el script helper
+source ../pulumi-local.env
+```
+
+### 2. Crear Nuevo Stack
+
+```bash
+cd eks-stacks
+
+# Crear stack desde template
+./pulumi-cli.sh bootstrap
+# Esto generará archivos Pulumi.<stack>.yaml para cada micro-stack
+```
+
+### 3. Configurar Stack
+
+Editar `Pulumi.<stack-name>.yaml`:
+
+```yaml
+config:
+  aws:region: us-east-1
+  aws:profile: eks-admin
+  
+  eks-stack:
+    # Configuración del cluster
+    clusterName: my-eks-cluster
+    kubernetesVersion: "1.28"
+    
+    # Configuración de red
+    vpcCidr: "10.0.0.0/16"
+    availabilityZones:
+      - us-east-1a
+      - us-east-1b
+      - us-east-1c
+    
+    # Node groups
+    nodeGroups:
+      - name: general-purpose
+        instanceType: t3.medium
+        minSize: 2
+        maxSize: 10
+        desiredSize: 3
+        
+      - name: compute-optimized
+        instanceType: c5.large
+        minSize: 0
+        maxSize: 5
+        desiredSize: 0
+```
+
+## 🚀 Despliegue
+
+### Preview (Sin crear recursos)
+
+Siempre ejecutar preview antes de aplicar cambios:
+
+```bash
+# Preview con backend local (recomendado para testing)
+./pulumi-cli.sh preview -s <stack-name> --local
+
+# Preview con cloud backend (requiere credenciales AWS)
+./pulumi-cli.sh preview -s <stack-name>
+```
+
+**Ejemplo de output:**
+```
+Previewing update (dev)
+
+View Live: https://app.pulumi.com/org/eks-stack/dev/previews/...
+
+     Type                        Name                    Plan       
+ +   pulumi:pulumi:Stack         eks-stack-dev           create     
+ +   ├─ aws:ec2:Vpc              main-vpc                create     
+ +   ├─ aws:iam:Role             eks-cluster-role        create     
+ +   └─ aws:eks:Cluster          eks-cluster             create     
+
+Resources:
+    + 47 to create
+
+Duration: 12s
+```
+
+### Despliegue Completo
+
+#### Inicializar Todos los Micro-stacks
+
+```bash
+# Este comando despliega todos los micro-stacks en orden
+./pulumi-cli.sh init -s <stack-name>
+```
+
+**Orden de despliegue:**
+1. **Stack principal** (orquestador) - ~2 min
+2. **infra-aws** (VPC, subnets, IAM) - ~3 min
+3. **infra-kube** (EKS cluster) - ~10 min
+4. **monitoring** (Prometheus, Grafana) - ~3 min
+5. **networking** (Ingress controller) - ~2 min
+6. **storage** (Redis, MongoDB) - ~4 min
+
+**Tiempo total estimado: ~15-20 minutos**
+
+#### Despliegue Selectivo
+
+Para desplegar solo un micro-stack específico:
+
+```bash
+# Desplegar solo monitoring
+./pulumi-cli.sh up -s <stack-name> --sub-stack-dir monitoring
+
+# Desplegar solo storage
+./pulumi-cli.sh up -s <stack-name> --sub-stack-dir storage
+```
+
+### Actualizar Stack Existente
+
+```bash
+# Actualizar todos los micro-stacks
+./pulumi-cli.sh up -s <stack-name>
+
+# Con refresh previo (recomendado)
+./pulumi-cli.sh up -s <stack-name> -r
+
+# Con preview interactivo
+./pulumi-cli.sh up -s <stack-name> -p
+```
+
+## 🔐 Acceso al Clúster
+
+### Configurar kubectl
+
+El script de despliegue configura kubectl automáticamente, pero también puedes hacerlo manualmente:
+
+```bash
+# Obtener kubeconfig
+aws eks --region <region> update-kubeconfig \
+  --name <cluster-name> \
+  --profile eks-admin
+
+# Verificar acceso
+kubectl get nodes
+```
+
+**Output esperado:**
+```
+NAME                         STATUS   ROLES    AGE   VERSION
+ip-10-0-1-123.ec2.internal   Ready    <none>   5m    v1.28.0-eks-a1b2c3d
+ip-10-0-2-456.ec2.internal   Ready    <none>   5m    v1.28.0-eks-a1b2c3d
+ip-10-0-3-789.ec2.internal   Ready    <none>   5m    v1.28.0-eks-a1b2c3d
+```
+
+### Contextos de kubectl
+
+```bash
+# Listar contextos disponibles
+kubectx
+
+# Cambiar a tu cluster
+kubectx arn:aws:eks:us-east-1:123456789012:cluster/my-eks-cluster
+
+# Alias más corto
+kubectx eks-dev=arn:aws:eks:us-east-1:123456789012:cluster/my-eks-cluster
+kubectx eks-dev
+
+# Cambiar namespace por defecto
+kubens monitoring
+```
+
+### Verificar Despliegue
+
+```bash
+# Ver todos los pods
+kubectl get pods --all-namespaces
+
+# Ver servicios importantes
+kubectl get svc -n monitoring
+kubectl get svc -n ingress-nginx
+
+# Ver estado de nodes
+kubectl top nodes
+```
+
+## 🛠️ Operaciones Comunes
+
+### Ver Estado del Stack
+
+```bash
+# Ver recursos desplegados
+pulumi stack -s <stack-name>
+
+# Ver outputs del stack
+pulumi stack output -s <stack-name>
+
+# Ver output específico
+pulumi stack output -s <stack-name> clusterEndpoint
+
+# Ver historial de deployments
+pulumi stack history -s <stack-name>
+```
+
+### Exportar Kubeconfig
+
+```bash
+# Exportar kubeconfig a archivo
+pulumi stack output -s <stack-name> kubeconfig > kubeconfig.yaml
+
+# Usar kubeconfig temporal
+export KUBECONFIG=./kubeconfig.yaml
+kubectl get nodes
+```
+
+### Refresh (Sincronizar estado)
+
+```bash
+# Refresh del stack principal
+./pulumi-cli.sh refresh -s <stack-name>
+
+# Refresh de sub-stack específico
+pulumi refresh -s <stack-name> -C infra-kube
+```
+
+### Logs y Debugging
+
+```bash
+# Ver logs de un deployment
+kubectl logs -n monitoring deployment/prometheus-server
+
+# Logs en tiempo real
+kubectl logs -n monitoring deployment/prometheus-server -f
+
+# Logs de múltiples pods (stern)
+stern -n monitoring prometheus
+
+# Describir recurso
+kubectl describe pod -n monitoring prometheus-server-xxx
+```
+
+### Escalar Recursos
+
+```bash
+# Escalar deployment
+kubectl scale deployment -n default my-app --replicas=5
+
+# Autoscaling
+kubectl autoscale deployment -n default my-app \
+  --min=2 --max=10 --cpu-percent=80
+```
+
+### Destruir Recursos
+
+```bash
+# CUIDADO: Esto eliminará todos los recursos
+./pulumi-cli.sh destroy -s <stack-name>
+
+# El script pedirá confirmación escribiendo el nombre del stack
+> Destroy operation cannot be undone!
+> Please confirm that this is what you'd like to do by typing 'dev':
+dev
+
+# Destruir solo un micro-stack
+pulumi destroy -s <stack-name> -C storage
+```
+
+## 📂 Estructura de Micro-stacks
+
+### infra-aws/
+
+**Propósito**: Infraestructura AWS base y networking
+
+**Recursos principales**:
+- VPC con subnets públicas y privadas (3 AZs)
+- Internet Gateway
+- NAT Gateways (uno por AZ para alta disponibilidad)
+- Route tables
+- Security groups para EKS
+- IAM roles y policies para EKS cluster y nodes
+
+**Configuración**:
+```yaml
+config:
+  infra-aws:
+    vpcCidr: "10.0.0.0/16"
+    availabilityZones: 3
+    enableNatGateway: true
+    singleNatGateway: false  # true para ahorro de costos
+```
+
+**Outputs**:
+- `vpcId`: ID de la VPC
+- `publicSubnetIds`: IDs de subnets públicas
+- `privateSubnetIds`: IDs de subnets privadas
+- `clusterSecurityGroupId`: Security group para EKS
+
+**Tiempo de despliegue**: ~3 minutos
+
+---
+
+### infra-kube/
+
+**Propósito**: Clúster EKS y node groups
+
+**Recursos principales**:
+- EKS cluster (control plane)
+- Managed node groups con autoscaling
+- EKS add-ons:
+  - kube-proxy
+  - coredns
+  - vpc-cni
+  - aws-ebs-csi-driver
+- OIDC provider para IAM roles
+- Cluster autoscaler
+
+**Configuración**:
+```yaml
+config:
+  infra-kube:
+    kubernetesVersion: "1.28"
+    nodeGroups:
+      - name: general-purpose
+        instanceType: t3.medium
+        minSize: 2
+        maxSize: 10
+        desiredSize: 3
+        diskSize: 50
+        
+      - name: spot-instances
+        instanceType: t3.large
+        minSize: 0
+        maxSize: 20
+        capacityType: SPOT  # Ahorro de costos
+```
+
+**Outputs**:
+- `clusterEndpoint`: Endpoint del cluster
+- `clusterName`: Nombre del cluster
+- `kubeconfig`: Configuración para kubectl
+- `clusterSecurityGroup`: Security group del cluster
+- `oidcProviderArn`: ARN del OIDC provider
+
+**Tiempo de despliegue**: ~10-12 minutos
+
+**Dependencias**: Requiere outputs de `infra-aws/`
+
+---
+
+### monitoring/
+
+**Propósito**: Observabilidad y monitoreo del cluster
+
+**Recursos principales**:
+- **Prometheus**: Métricas del cluster y aplicaciones
+- **Grafana**: Visualización de métricas
+- **CloudWatch Container Insights**: Integración con AWS
+- **Alertmanager**: Gestión de alertas
+- **Node Exporter**: Métricas de nodes
+- **Kube State Metrics**: Métricas de objetos K8s
+
+**Configuración**:
+```yaml
+config:
+  monitoring:
+    prometheusEnabled: true
+    prometheusRetention: "30d"
+    prometheusStorageSize: "50Gi"
+    
+    grafanaEnabled: true
+    grafanaDomain: "grafana.example.com"
+    grafanaAdminPassword: "change-me"  # Usar secrets
+    
+    cloudwatchEnabled: true
+    
+    alertmanagerUrl: "https://slack-webhook-url"
+```
+
+**Acceso a UIs**:
+
+```bash
+# Grafana (port-forward)
+kubectl port-forward -n monitoring svc/grafana 3000:80
+# Abrir: http://localhost:3000
+# Usuario: admin / Password: <configurado>
+
+# Prometheus
+kubectl port-forward -n monitoring svc/prometheus-server 9090:80
+# Abrir: http://localhost:9090
+
+# Alertmanager
+kubectl port-forward -n monitoring svc/alertmanager 9093:80
+```
+
+**Dashboards pre-configurados**:
+- Cluster Overview
+- Node Metrics
+- Pod Resources
+- Namespace Resources
+- Persistent Volumes
+
+**Tiempo de despliegue**: ~3-4 minutos
+
+**Dependencias**: Requiere `kubeconfig` de `infra-kube/`
+
+---
+
+### networking/
+
+**Propósito**: Ingress y gestión de red
+
+**Recursos principales**:
+- **NGINX Ingress Controller**: Enrutamiento HTTP/HTTPS
+- **Cert-manager**: Certificados SSL/TLS automáticos (Let's Encrypt)
+- **External DNS**: Gestión automática de registros DNS
+- **Network Policies**: Seguridad de red a nivel de pods
+- **AWS Load Balancer Controller**: Integración con ALB/NLB
+
+**Configuración**:
+```yaml
+config:
+  networking:
+    ingressClass: nginx
+    enableTLS: true
+    certManagerEmail: "admin@example.com"
+    
+    externalDnsEnabled: true
+    domainFilter: "example.com"
+    
+    loadBalancerType: "nlb"  # o "alb"
+```
+
+**Ejemplo de Ingress**:
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-app
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - app.example.com
+    secretName: app-tls
+  rules:
+  - host: app.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: my-app
+            port:
+              number: 80
+```
+
+**Tiempo de despliegue**: ~2-3 minutos
+
+**Dependencias**: Requiere `kubeconfig` de `infra-kube/`
+
+---
+
+### storage/
+
+**Propósito**: Almacenamiento y bases de datos
+
+**Recursos principales**:
+- **Redis Cluster**: Cache distribuido
+- **MongoDB**: Base de datos NoSQL
+- **Amazon RDS** (opcional): PostgreSQL/MySQL gestionado
+- **EBS CSI Driver**: Persistent volumes
+- **Backup Cronjobs**: Respaldos automáticos
+
+**Configuración**:
+```yaml
+config:
+  storage:
+    redisEnabled: true
+    redisClusterSize: 3
+    redisMemory: "2Gi"
+    
+    mongodbEnabled: true
+    mongodbReplicas: 3
+    mongodbStorageSize: "20Gi"
+    
+    rdsEnabled: false
+    rdsInstanceClass: "db.t3.medium"
+    rdsAllocatedStorage: 100
+```
+
+**Acceso a bases de datos**:
+
+```bash
+# Redis (port-forward)
+kubectl port-forward -n storage svc/redis-master 6379:6379
+redis-cli -h localhost
+
+# MongoDB
+kubectl port-forward -n storage svc/mongodb 27017:27017
+mongo mongodb://localhost:27017
+```
+
+**Persistent Volumes**:
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: app-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: gp3  # AWS EBS gp3
+  resources:
+    requests:
+      storage: 10Gi
+```
+
+**Tiempo de despliegue**: ~4-5 minutos
+
+**Dependencias**: Requiere `kubeconfig` de `infra-kube/`
+
+---
+
+## 🔧 Troubleshooting
+
+### Problemas Comunes
+
+#### 1. Error de Autenticación AWS
+
+**Síntoma**:
+```
+error: Unable to connect to the server: getting credentials: exec: exit status 1
+```
+
+**Solución**:
+```bash
+# Verificar credenciales
+aws sts get-caller-identity --profile eks-admin
+
+# Re-configurar si es necesario
+aws configure --profile eks-admin
+
+# Actualizar kubeconfig
+aws eks update-kubeconfig --name <cluster-name> --region <region> --profile eks-admin
+```
+
+#### 2. Conflicto de Estado Pulumi
+
+**Síntoma**:
+```
+error: the current deployment has X resource(s) with pending operations
+```
+
+**Solución**:
+```bash
+# Refresh para sincronizar
+pulumi refresh -s <stack-name>
+
+# Si persiste, cancelar operaciones pendientes
+pulumi cancel -s <stack-name>
+
+# Último recurso: exportar/importar estado
+pulumi stack export -s <stack-name> > state-backup.json
+# Editar manualmente si es necesario
+pulumi stack import -s <stack-name> < state-backup.json
+```
+
+#### 3. kubectl no puede conectar al cluster
+
+**Síntoma**:
+```
+Unable to connect to the server: dial tcp: lookup XXX: no such host
+```
+
+**Solución**:
+```bash
+# Re-generar kubeconfig
+aws eks update-kubeconfig --name <cluster-name> --region <region>
+
+# Verificar contexto
+kubectl config current-context
+
+# Verificar que el cluster está running
+aws eks describe-cluster --name <cluster-name> --region <region>
+```
+
+#### 4. Nodes no se registran en el cluster
+
+**Síntoma**:
+```
+kubectl get nodes
+# No nodes disponibles después de 10+ minutos
+```
+
+**Solución**:
+```bash
+# Ver logs de node group
+aws eks describe-nodegroup \
+  --cluster-name <cluster-name> \
+  --nodegroup-name <nodegroup-name> \
+  --region <region>
+
+# Verificar IAM roles
+# El role de los nodes debe tener estas policies:
+# - AmazonEKSWorkerNodePolicy
+# - AmazonEKS_CNI_Policy
+# - AmazonEC2ContainerRegistryReadOnly
+
+# Ver EC2 instances
+aws ec2 describe-instances \
+  --filters "Name=tag:eks:cluster-name,Values=<cluster-name>" \
+  --region <region>
+```
+
+#### 5. Pods en estado Pending
+
+**Síntoma**:
+```
+kubectl get pods -n monitoring
+NAME                          READY   STATUS    RESTARTS   AGE
+prometheus-server-xxx         0/1     Pending   0          5m
+```
+
+**Solución**:
+```bash
+# Verificar por qué está pending
+kubectl describe pod -n monitoring prometheus-server-xxx
+
+# Razones comunes:
+# - Insufficient CPU/Memory: Escalar node group
+# - Pending PVC: Verificar storage class y EBS CSI driver
+# - Node selector no match: Ajustar node labels
+
+# Escalar node group si es necesario
+aws eks update-nodegroup-config \
+  --cluster-name <cluster-name> \
+  --nodegroup-name <nodegroup-name> \
+  --scaling-config minSize=3,maxSize=10,desiredSize=5
+```
+
+#### 6. Recursos Atorados en Deletion
+
+**Síntoma**:
+```
+pulumi destroy lleva >30 minutos y no termina
+```
+
+**Solución**:
+```bash
+# Ver qué recursos están bloqueados
+pulumi stack -s <stack-name> --show-urns
+
+# Finalizers en Kubernetes pueden bloquear
+kubectl get all --all-namespaces -o json | \
+  jq '.items[] | select(.metadata.deletionTimestamp != null)'
+
+# Eliminar finalizers manualmente
+kubectl patch <resource> <name> -n <namespace> \
+  --type json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]'
+
+# Eliminar recurso del estado Pulumi (último recurso)
+pulumi state delete <urn> -s <stack-name>
+```
+
+### Logs y Debugging
+
+```bash
+# Ver logs de pulumi deployment
+pulumi logs -s <stack-name>
+
+# Ver logs de pod con errores
+kubectl logs -n <namespace> <pod-name> --previous
+
+# Ver eventos del cluster
+kubectl get events --all-namespaces --sort-by='.lastTimestamp'
+
+# Shell interactivo en pod
+kubectl exec -it -n <namespace> <pod-name> -- /bin/bash
+
+# Debug de network
+kubectl run tmp-shell --rm -i --tty --image nicolaka/netshoot -- /bin/bash
+```
+
+## ✅ Mejores Prácticas
+
+### 1. Usar Preview Antes de Aplicar
+
+```bash
+# SIEMPRE revisar cambios antes de aplicar
+./pulumi-cli.sh preview -s <stack-name>
+
+# Especialmente importante para producción
+./pulumi-cli.sh preview -s prod > preview-output.txt
+# Revisar y compartir con el equipo antes de proceder
+```
+
+### 2. Tags y Naming Conventions
+
+Todos los recursos incluyen tags automáticos:
+
+```yaml
+tags:
+  Project: eks-stack
+  Environment: dev  # o prod, staging
+  ManagedBy: pulumi
+  Owner: team-name
+  CostCenter: engineering
+```
+
+Convención de nombres:
+```
+<project>-<component>-<environment>-<resource>
+
+Ejemplos:
+- eks-cluster-dev-main
+- eks-nodegroup-prod-general
+- eks-vpc-staging-main
+```
+
+### 3. Secrets Management
+
+**NUNCA commitear secrets**. Usar Pulumi secrets:
+
+```bash
+# Configurar secret
+pulumi config set --secret dbPassword "MySecurePassword123!" -s <stack-name>
+
+# Ver secrets (encriptados)
+pulumi config -s <stack-name>
+
+# Usar en código
+cfg := config.New(ctx, "")
+password := cfg.RequireSecret("dbPassword")
+```
+
+**Alternativa: AWS Secrets Manager**
+
+```go
+secret, err := secretsmanager.NewSecret(ctx, "db-password", 
+    &secretsmanager.SecretArgs{
+        Description: pulumi.String("Database password"),
+    })
+
+secretVersion, err := secretsmanager.NewSecretVersion(ctx, "db-password-v1",
+    &secretsmanager.SecretVersionArgs{
+        SecretId:     secret.ID(),
+        SecretString: pulumi.String("MySecurePassword123!"),
+    })
+```
+
+### 4. Cost Optimization
+
+```yaml
+# Usar Spot instances para workloads tolerantes a fallas
+nodeGroups:
+  - name: spot-workers
+    capacityType: SPOT
+    instanceTypes:
+      - t3.medium
+      - t3.large
+    minSize: 0
+    maxSize: 20
+
+# Single NAT Gateway para dev/staging (no para prod)
+infra-aws:
+  singleNatGateway: true  # Ahorra ~$90/mes
+
+# Cluster Autoscaler para escalar a cero cuando no se usa
+infra-kube:
+  enableClusterAutoscaler: true
+  scaleDownDelay: "10m"
+```
+
+### 5. Monitoreo y Alertas
+
+```yaml
+# Configurar alertas importantes
+monitoring:
+  alerts:
+    - name: HighMemoryUsage
+      condition: node_memory_usage > 85%
+      severity: warning
+      
+    - name: PodCrashLooping
+      condition: pod_restarts > 5
+      severity: critical
+      
+    - name: APIServerDown
+      condition: up{job="apiserver"} == 0
+      severity: critical
+```
+
+### 6. Backups
+
+```bash
+# Backup de recursos importantes
+./scripts/backup-resources.sh
+
+# Backup de Pulumi state
+pulumi stack export -s <stack-name> > backup-$(date +%Y%m%d).json
+
+# Backup de etcd (si self-managed, no aplica para EKS)
+# EKS gestiona backups del control plane automáticamente
+```
+
+### 7. CI/CD Integration
+
+Ver ejemplos en `.github/workflows/` o `.gitlab-ci.yml`:
+
+```yaml
+# GitHub Actions example
+name: Deploy EKS
+on:
+  push:
+    branches: [main]
+    
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: pulumi/actions@v3
+        with:
+          command: up
+          stack-name: dev
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+```
+
+### 8. Security Hardening
+
+```yaml
+# Network policies
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all-ingress
+  namespace: default
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+
+# Pod Security Standards
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: production
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+```
+
+## 📚 Documentación Adicional
+
+- [Pulumi AWS Provider](https://www.pulumi.com/registry/packages/aws/)
+- [Pulumi Kubernetes Provider](https://www.pulumi.com/registry/packages/kubernetes/)
+- [Amazon EKS Best Practices](https://aws.github.io/aws-eks-best-practices/)
+- [Kubernetes Documentation](https://kubernetes.io/docs/)
+
+## 🔗 Links Útiles
+
+- [AWS EKS Workshop](https://www.eksworkshop.com/)
+- [EKS Blueprints](https://aws-quickstart.github.io/cdk-eks-blueprints/)
+- [Pulumi Examples](https://github.com/pulumi/examples)
+
+---
+
+**Parte del TFM**: "Implementación de una Estrategia Multicloud para el Despliegue de Aplicaciones Usando Pulumi Micro-stacks"
