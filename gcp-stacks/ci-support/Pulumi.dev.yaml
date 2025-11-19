@@ -1,2 +1,2 @@
 config:
-  gcp:project: native-link-cloud
+  gcp:project: cloud-platform-tfm

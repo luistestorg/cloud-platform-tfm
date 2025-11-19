@@ -1,7 +1,0 @@
-name: nativelink-shared
-runtime: go
-description: Pulumi Gcloud Microstack to manage nativelink-shared components
-config:
-  pulumi:tags:
-    value:
-      pulumi:template: gcp-go

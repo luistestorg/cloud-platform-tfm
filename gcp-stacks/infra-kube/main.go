@@ -147,7 +147,7 @@ func InitTLSConfig(cfg *config.Config) *shared.TLSConfig {
 		tlsCfg.AcmeServer = "https://acme-staging-v02.api.letsencrypt.org/directory"
 	}
 	if tlsCfg.Email == "" {
-		tlsCfg.Email = "tim@tracemachina.com"
+		tlsCfg.Email = "lmunozes@gmail.com"
 	}
 	return &tlsCfg
 }

@@ -1,5 +1,5 @@
 config:
-  gcp:project: native-link-cloud
+  gcp:project: cloud-platform-tfm
   infra-gcp:kubeVersion: 1.28.15-gke.1480000
   infra-gcp:armZone1: us-central1-a
   infra-gcp:armZone2: us-central1-b

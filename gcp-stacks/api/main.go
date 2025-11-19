@@ -254,11 +254,7 @@ func initSelfServiceApiConfig(cfg *config.Config) *shared.SelfServiceAPIConfig {
 		ssApiCfg.SegmentAPIWriteKey = cfg.RequireSecret("segmentApiWriteKey")
 	}
 
-	if ssApiCfg.DbOffsiteBackupBucket != "" {
-		ssApiCfg.DbOffsiteBackupGCSKeyFile = cfg.RequireSecret("dbOffsiteBackupGCSKey")
-	}
-
-	ssApiCfg.NativeLinkImage = cfg.Require("nativeLinkImage")
+	ssApiCfg.APIImage = cfg.Require("APIImage")
 
 	ssApiCfg.PgUsername = cfg.Require("pgUsername")
 

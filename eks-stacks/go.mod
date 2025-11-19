@@ -1,10 +1,10 @@
-module try-nativelink
+module eks-stack
 
 go 1.22.4
 
-replace tracemachina.com/resources => ./resources/
+replace tracemachina.com/resources => ../resources/
 
-replace tracemachina.com/shared => ./shared/
+replace tracemachina.com/shared => ../shared/
 
 require (
 	github.com/pulumi/pulumi-aws-iam/sdk v0.2.0

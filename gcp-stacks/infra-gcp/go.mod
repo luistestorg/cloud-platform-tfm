@@ -4,7 +4,7 @@ go 1.22.4
 
 replace tracemachina.com/stack => ../stack
 
-replace tracemachina.com/resources => ../../nativelink-cloud/resources/
+replace tracemachina.com/resources => ../../resources/
 
 require (
 	github.com/pulumi/pulumi-gcp/sdk/v8 v8.29.0

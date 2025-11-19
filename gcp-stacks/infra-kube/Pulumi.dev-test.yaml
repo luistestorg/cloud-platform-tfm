@@ -1,6 +1,6 @@
 config:  
-  gcp:project: native-link-cloud
-  infra-kube:project: native-link-cloud
+  gcp:project: cloud-platform-tfm
+  infra-kube:project: cloud-platform-tfm
   infra-kube:tls:
     acmeServer: https://acme-v02.api.letsencrypt.org/directory
   infra-kube:globalStack: dev-test

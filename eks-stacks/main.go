@@ -34,9 +34,9 @@ import (
 
 const (
 	GlobalHelmChartPath           = "helm-charts"
-	GlobalDashboardPath           = "./config/dashboards"
-	GlobalKibanaDashboardPath     = "./config/dashboards/%s-dashboards.ndjson"
-	GlobalConfigPath              = "./config"
+	GlobalDashboardPath           = "../config/dashboards"
+	GlobalKibanaDashboardPath     = "../config/dashboards/%s-dashboards.ndjson"
+	GlobalConfigPath              = "../config"
 	GlobalCrossplanePath          = "./crossplane/"
 	GlobalTemporalImageRepository = "299166832260.dkr.ecr.us-west-2.amazonaws.com"
 

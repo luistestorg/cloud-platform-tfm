@@ -1,20 +1,17 @@
 config:
-  gcp:project: native-link-cloud
-  api:project: native-link-cloud
+  gcp:project: cloud-platform-tfm
+  api:project: cloud-platform-tfm
   api:apiEnabled: "true"
-  api:apiImage: "us-central1-docker.pkg.dev/native-link-cloud/nativelink-images/nativelink-api:dev"
+  api:apiImage: "us-central1-docker.pkg.dev/native-link-cloud/tfm-images/tfm-api:dev"
   api:SegmentApiEnabled: "false"
   api:enableTemporal: "true"
-  api:pgUsername: "nlssapidb"  
-  api:dbOffsiteBackupBucket: "gs://nativelink-offsite-db-backups/dev-usw2"
-  api:dbOffsiteBackupProject: native-link-cloud
-  api:dbOffsiteBackupServiceAccount: "gcs-backup@native-link-cloud.iam.gserviceaccount.com"
-  api:nativeLinkImage: "ghcr.io/tracemachina/nativelink:db22y8nkyyly28ikw4x40qlh8273mw9g"
+  api:pgUsername: "tfmssapidb"  
+  api:nativeLinkImage: "ghcr.io/tracemachina/cloud-platform-tfm:db22y8nkyyly28ikw4x40qlh8273mw9g"
   api:globalStack: uc1-dev
   api:ecrRegion: "us-east-2"
   api:awsRegion: "us-west-2"
   api:profile: "NativeLinkCloudGKEAccess"
-  api:gcpAWSRoleArn: "arn:aws:iam::299166832260:role/gke-nativelink-cloud-deployer"
+  api:gcpAWSRoleArn: "arn:aws:iam::299166832260:role/gke-cloud-platform-tfm-deployer"
   api:gcpAWSSub: "115077250155057901318"  
   api:oauth2CookieSecret:
     secure: AAABALJJ5pejRnOhx8kdYhjtaXO+J5brceBQCiKbOhy4UQ4cltzCCtIh+SiWgGxNIL9lzyblrZXJXAwNB34mxQ==

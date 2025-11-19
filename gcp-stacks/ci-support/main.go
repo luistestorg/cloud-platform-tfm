@@ -15,10 +15,6 @@ import (
 	globalStack "tracemachina.com/stack"
 )
 
-const (
-	BuildBarnConfigPath = "../../nativelink-cloud/config/buildbarn"
-)
-
 func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
 		cfg := config.New(ctx, "")
@@ -158,22 +154,10 @@ func main() {
 			}
 		}
 
-		if s.CiSupportCfg.EnableTekton {
-			if err = s.CiSupportCfg.DeployTekton(ctx, s); err != nil {
-				return err
-			}
-		}
-
 		if enableUISecretUpdater {
 
 			err = createGCPAuthJobs(ctx, uiNamespace, s)
 			if err != nil {
-				return err
-			}
-		}
-
-		if s.CiSupportCfg.EnableBuildBarn {
-			if err = s.CiSupportCfg.DeployBuildBarn(ctx, s, BuildBarnConfigPath); err != nil {
 				return err
 			}
 		}
@@ -195,24 +179,9 @@ func initCiSupportConfig(cfg *config.Config) (*shared.CiSupportSharedStack, bool
 		secCompConfig.GithubActionsAppInstID = cfg.RequireSecret("github_app_installation_id")
 		secCompConfig.GithubActionsPrivateKey = cfg.RequireSecret("github_app_private_key")
 
-		secCompConfig.EnableHelmActionsSet = cfg.GetBool("enableHelmActionsSet")
-		if secCompConfig.EnableHelmActionsSet {
-			secCompConfig.GithubHelmConfigUrl = cfg.Require("githubHelmConfigUrl")
-		}
-
-		secCompConfig.EnableUI3ActionsSet = cfg.GetBool("enableUI3ActionsSet")
-		if secCompConfig.EnableUI3ActionsSet {
-			secCompConfig.GithubUI3ConfigUrl = cfg.Require("githubUI3ConfigUrl")
-		}
-
 	}
-	secCompConfig.EnableTekton = cfg.GetBool("enableTekton")
-	secCompConfig.EnableBuildBarn = cfg.GetBool("enableBuildBarn")
+
 	enableUISecretUpdater := cfg.GetBool("enableUISecretUpdater")
-
-	if enableUISecretUpdater {
-		return &secCompConfig, enableUISecretUpdater, cfg.Require("uiNamespace")
-	}
 	return &secCompConfig, enableUISecretUpdater, ""
 
 }

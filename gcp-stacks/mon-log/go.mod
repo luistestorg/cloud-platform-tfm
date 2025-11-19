@@ -4,9 +4,9 @@ go 1.22.4
 
 replace tracemachina.com/stack => ../stack
 
-replace tracemachina.com/resources => ../../nativelink-cloud/resources/
+replace tracemachina.com/resources => ../../resources/
 
-replace tracemachina.com/shared => ../../nativelink-cloud/shared/
+replace tracemachina.com/shared => ../../shared/
 
 require (
 	github.com/pulumi/pulumi-kubernetes/sdk/v4 v4.22.2

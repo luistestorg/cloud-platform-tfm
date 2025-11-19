@@ -6,18 +6,18 @@ import (
 )
 
 const (
-	GlobalHelmChartPath           = "../../nativelink-cloud/helm-charts"
-	GlobalDashboardPath           = "../../nativelink-cloud/config/dashboards"
-	GlobalKibanaDashboardPath     = "../../nativelink-cloud/config/dashboards/%s-dashboards.ndjson"
-	GlobalConfigPath              = "../../nativelink-cloud/config"
-	GlobalCrossplanePath          = "../../nativelink-cloud/crossplane/"
-	GlobalGKEServiceAccount       = "gke-cloud-platform-deployer@native-link-cloud.iam.gserviceaccount.com"
-	GlobalWorkloadIdentityPool    = "native-link-cloud.svc.id.goog"
+	GlobalHelmChartPath           = "../../helm-charts"
+	GlobalDashboardPath           = "../../config/dashboards"
+	GlobalKibanaDashboardPath     = "../../config/dashboards/%s-dashboards.ndjson"
+	GlobalConfigPath              = "../../config"
+	GlobalCrossplanePath          = "../../crossplane/"
+	GlobalGKEServiceAccount       = "gke-cloud-platform-deployer@cloud-platform-tfm.iam.gserviceaccount.com"
+	GlobalWorkloadIdentityPool    = "cloud-platform-tfm.svc.id.goog"
 	GlobalClusterIssuer           = "letsencrypt-tls-issuer"
 	Platform                      = "gke"
-	GlobalPriorityClassName       = "trace-high-priority"
+	GlobalPriorityClassName       = "tfm-high-priority"
 	GlobalPriorityClassValue      = 1000000000
-	GlobalTemporalImageRepository = "us-central1-docker.pkg.dev/native-link-cloud/nativelink"
+	GlobalTemporalImageRepository = "us-central1-docker.pkg.dev/cloud-platform-tfm/tfm"
 )
 
 func GenerateKubeconfig(clusterEndpoint pulumi.StringOutput, clusterName pulumi.StringOutput,

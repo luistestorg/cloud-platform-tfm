@@ -1,14 +1,13 @@
 config:
-  gcp:project: native-link-cloud
-  mon-log:domain: uc1.scdev.nativelink.net
-  mon-log:oauth2AuthUrl: "https://nativelink-dev.auth.us-west-2.amazoncognito.com/oauth2/authorize"
+  gcp:project: cloud-platform-tfm
+  mon-log:domain: uc1.scdev.tfm.net
+  mon-log:oauth2AuthUrl: "https://tfm.auth.us-west-2.amazoncognito.com/oauth2/authorize"
   mon-log:oauth2ClientId: "41757fo07lp8h2619ia3moj4m1"
   mon-log:oauth2GroupsClaim: "cognito:groups"
-  mon-log:oauth2TokenUrl: "https://nativelink-dev.auth.us-west-2.amazoncognito.com/oauth2/token"
-  mon-log:oauth2ValidateUrl: "https://nativelink-dev.auth.us-west-2.amazoncognito.com/oauth2/userInfo"
+  mon-log:oauth2TokenUrl: "https://tfm.auth.us-west-2.amazoncognito.com/oauth2/token"
+  mon-log:oauth2ValidateUrl: "https://tfm.auth.us-west-2.amazoncognito.com/oauth2/userInfo"
   mon-log:oidcIssuerUrl: "https://cognito-idp.us-west-2.amazonaws.com/us-west-2_qaN8wa6M1"
   mon-log:EnableElasticSearch: "true"
-  mon-log:EnableOTEL: "true"
   mon-log:ElasticSearchStorageClass: "standard"
   mon-log:KibanaStorageClass: "standard"
   mon-log:globalStack: uc1-dev

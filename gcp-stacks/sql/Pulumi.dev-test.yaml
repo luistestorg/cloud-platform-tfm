@@ -1,5 +1,5 @@
 config:
-  gcp:project: native-link-cloud
+  gcp:project: cloud-platform-tfm
   sql:dbEdition: "ENTERPRISE"
   sql:dbInstanceType: db-f1-micro
   sql:dbName: dev-test

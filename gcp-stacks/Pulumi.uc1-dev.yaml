@@ -1,6 +1,6 @@
 config:
-  gcp:project: native-link-cloud
-  gcp-stack:project: native-link-cloud
+  gcp:project: cloud-platform-tfm
+  gcp-stack:project: cloud-platform-tfm
   gcp-stack:region: us-central1
   gcp-stack:vpcName: uc1-dev
   gcp-stack:clusterName: uc1-dev

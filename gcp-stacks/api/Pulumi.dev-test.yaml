@@ -2,15 +2,11 @@ config:
   gcp:project: native-link-cloud
   api:project: native-link-cloud
   api:apiEnabled: "true"
-  api:apiImage: "299166832260.dkr.ecr.us-east-2.amazonaws.com/nativelink-api:dev"
+  api:apiImage: "299166832260.dkr.ecr.us-east-2.amazonaws.com/tfm-api:dev"
   api:SegmentApiEnabled: "false"
   api:enableTemporal: "true"
   api:pgUsername: "nlssapidb"
-  api:profile: "NativeLinkCloudGKEAccess"
-  api:dbOffsiteBackupBucket: "gs://nativelink-offsite-db-backups/dev-usw2"
-  api:dbOffsiteBackupProject: native-link-cloud
-  api:dbOffsiteBackupServiceAccount: "gcs-backup@native-link-cloud.iam.gserviceaccount.com"
-  api:nativeLinkImage: "ghcr.io/tracemachina/nativelink:asrjx5ppkxjfxyhk88r5dk8hm6j33vf2"
+  api:profile: "ApiGKEAccess"
   api:globalStack: dev-test
   api:ecrRegion: "us-east-2"
   api:oauth2CookieSecret:

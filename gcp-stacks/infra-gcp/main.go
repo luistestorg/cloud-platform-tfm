@@ -121,7 +121,7 @@ func main() {
 			taints: &container.NodePoolNodeConfigTaintArray{
 				&container.NodePoolNodeConfigTaintArgs{
 					Effect: pulumi.String("NO_SCHEDULE"),
-					Key:    pulumi.String("nativelink/tolerates-spot"),
+					Key:    pulumi.String("tfm/tolerates-spot"),
 					Value:  pulumi.String("true"),
 				},
 			},
@@ -143,7 +143,7 @@ func main() {
 			taints: &container.NodePoolNodeConfigTaintArray{
 				&container.NodePoolNodeConfigTaintArgs{
 					Effect: pulumi.String("NO_SCHEDULE"),
-					Key:    pulumi.String("nativelink/tolerates-spot"),
+					Key:    pulumi.String("tfm/tolerates-spot"),
 					Value:  pulumi.String("true"),
 				},
 			},
@@ -200,12 +200,7 @@ func main() {
 			taints: &container.NodePoolNodeConfigTaintArray{
 				&container.NodePoolNodeConfigTaintArgs{
 					Effect: pulumi.String("NO_SCHEDULE"),
-					Key:    pulumi.String("nativelink/tolerates-spot"),
-					Value:  pulumi.String("true"),
-				},
-				&container.NodePoolNodeConfigTaintArgs{
-					Effect: pulumi.String("NO_SCHEDULE"),
-					Key:    pulumi.String("nativelink/demo-builds-amd64"),
+					Key:    pulumi.String("tfm/tolerates-spot"),
 					Value:  pulumi.String("true"),
 				},
 			},

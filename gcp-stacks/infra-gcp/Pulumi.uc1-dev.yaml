@@ -1,5 +1,5 @@
 config:
-  gcp:project: native-link-cloud
+  gcp:project: cloud-platform-tfm
   #Check cluster current version to avoid nodepool recreation because GKE updates the value
   infra-gcp:kubeVersion: 1.31.8-gke.1045000
   infra-gcp:armZone1: us-central1-a

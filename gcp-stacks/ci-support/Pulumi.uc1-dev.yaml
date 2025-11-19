@@ -1,18 +1,10 @@
 config:
-  gcp:project: native-link-cloud
-  ci-support:project: native-link-cloud
+  gcp:project: cloud-platform-tfm
+  ci-support:project: cloud-platform-tfm
   ci-support:globalStack: uc1-dev
-  ci-support:enableTekton: true
   ci-support:enableActionsController: true
-  ci-support:enableHelmActionsSet: true
-  ci-support:enableUI3ActionsSet: true
-  ci-support:enableUISecretUpdater: true
-  ci-support:enableBuildBarn: true
   #Update serviceaccount's permissions to match this value: https://console.cloud.google.com/iam-admin/serviceaccounts/details/115077250155057901318/permissions?hl=en&invt=AbufXg&project=native-link-cloud
-  ci-support:uiNamespace: "web-ui-dev"
-  ci-support:githubConfigUrl: "https://github.com/TraceMachina/cloud-platform"
-  ci-support:githubHelmConfigUrl: "https://github.com/TraceMachina/nativelink-helm"
-  ci-support:githubUI3ConfigUrl: "https://github.com/TraceMachina/ui3"
+  ci-support:githubConfigUrl: "https://github.com/luistestorg/cloud-platform-tfm"
   ci-support:github_app_id:
     secure: AAABAKi3aZR33+lO7uYxwyPShpF5HpuAV+EsAakc8Fw8SgKPTlY=
   ci-support:github_app_installation_id:
