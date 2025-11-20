@@ -1,10 +1,10 @@
-module tracemachina.com/stack
+module unir-tfm.com/stack
 
 go 1.22.4
 
-replace tracemachina.com/resources => ../../nativelink-cloud/resources/
+replace unir-tfm.com/resources => ../../resources/
 
-replace tracemachina.com/shared => ../../nativelink-cloud/shared/
+replace unir-tfm.com/shared => ../../shared/
 
 require (
 	github.com/pulumi/pulumi-gcp/sdk/v8 v8.29.0

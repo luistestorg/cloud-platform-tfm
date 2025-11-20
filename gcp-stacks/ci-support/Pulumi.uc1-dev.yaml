@@ -3,7 +3,7 @@ config:
   ci-support:project: cloud-platform-tfm
   ci-support:globalStack: uc1-dev
   ci-support:enableActionsController: true
-  #Update serviceaccount's permissions to match this value: https://console.cloud.google.com/iam-admin/serviceaccounts/details/115077250155057901318/permissions?hl=en&invt=AbufXg&project=native-link-cloud
+  #Update serviceaccount's permissions to match this value: https://console.cloud.google.com/iam-admin/serviceaccounts/details/115077250155057901318/permissions?hl=en&invt=AbufXg&project=cloud-platform-tfm
   ci-support:githubConfigUrl: "https://github.com/luistestorg/cloud-platform-tfm"
   ci-support:github_app_id:
     secure: AAABAKi3aZR33+lO7uYxwyPShpF5HpuAV+EsAakc8Fw8SgKPTlY=

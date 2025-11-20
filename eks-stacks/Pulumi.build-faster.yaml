@@ -72,10 +72,10 @@ config:
   cloud-platform-tfm:selfServiceApi:
     apiEnabled: true
     nativeLinkImage: "ghcr.io/tracemachina/nativelink:db22y8nkyyly28ikw4x40qlh8273mw9g"
-    apiImage: "299166832260.dkr.ecr.us-east-2.amazonaws.com/nativelink-api:latest"
+    apiImage: "299166832260.dkr.ecr.us-east-2.amazonaws.com/tfm-api:latest"
     dbOffsiteBackupBucket: "gs://nativelink-offsite-db-backups/build-faster"
-    dbOffsiteBackupProject: "native-link-cloud"
-    dbOffsiteBackupServiceAccount: "gcs-backup@native-link-cloud.iam.gserviceaccount.com"
+    dbOffsiteBackupProject: "cloud-platform-tfm"
+    dbOffsiteBackupServiceAccount: "gcs-backup@cloud-platform-tfm.iam.gserviceaccount.com"
     enableTemporal: true
     rdsInstanceType: db.t4g.medium
     rdsStorage: 40
@@ -98,7 +98,7 @@ config:
     secure: AAABAN/edY6QDq0bagoearafM+Oo9mKzc4Gv/Kfwk3WXEJlnf701lGX+1hh4V+/7hsACo+lfO+eqTEltv2Emj8u2mY3NUSvBcSWJtlcKggvkAi8WZT534CFgdaPzjjhZb4TY/P3peayG9IHYf4Pi9JU=
   cloud-platform-tfm:tls:
     acmeServer: https://acme-v02.api.letsencrypt.org/directory
-    domain: build-faster.nativelink.net
+    domain: build-faster.tfm-demo.com
     route53ZoneId: Z074895928H8N8A6C12XU
   cloud-platform-tfm:githubAuthToken:
     secure: AAABAAP9Dqp0iIYqvVklMETo1KvP128HhyZIrXcP92s0yU5nga05IqNnljRZcJJj2oiumG67NynW+JCKtaT13akDFIG3YEdplJvvToouBT/7RilTfio0R88IHta4wvuPc8OeIHQwGdeHulWdhveizU2+BvMCGMf0c/R/U6A=

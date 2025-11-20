@@ -11,8 +11,8 @@ import (
 	rbacv1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/rbac/v1"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
-	"tracemachina.com/shared"
-	globalStack "tracemachina.com/stack"
+	"unir-tfm.com/shared"
+	globalStack "unir-tfm.com/shared-gcp"
 )
 
 func main() {
@@ -196,7 +196,7 @@ func createGCPAuthJobs(ctx *pulumi.Context, ns string, s *shared.Stack) error {
 			Name:      pulumi.String("ecr-renew-secret"),
 			Namespace: pulumi.String(ns),
 			Annotations: pulumi.StringMap{
-				"iam.gke.io/gcp-service-account": pulumi.String("gke-cloud-platform-deployer@native-link-cloud.iam.gserviceaccount.com"),
+				"iam.gke.io/gcp-service-account": pulumi.String("gke-cloud-platform-deployer@cloud-platform-tfm.iam.gserviceaccount.com"),
 			},
 		},
 	}, pulumi.Provider(s.K8sProvider))
@@ -284,8 +284,8 @@ func createGCPAuthJobs(ctx *pulumi.Context, ns string, s *shared.Stack) error {
 		"ECR_TOKEN=`gcloud secrets versions access latest --secret=CloudEngSA_ECR --quiet`",
 		"kubectl delete secret --ignore-not-found $DOCKER_SECRET_NAME -n $NAMESPACE",
 		"kubectl create secret docker-registry $DOCKER_SECRET_NAME --docker-server=https://299166832260.dkr.ecr.${ECR_REGION}.amazonaws.com --docker-username=AWS --docker-password=${ECR_TOKEN} --namespace=$NAMESPACE_NAME",
-		"kubectl label secret $DOCKER_SECRET_NAME -n $NAMESPACE nativelink/secret-type=regcred",
-		"kubectl annotate secret $DOCKER_SECRET_NAME -n $NAMESPACE nativelink/registry-url=299166832260.dkr.ecr.${ECR_REGION}.amazonaws.com",
+		"kubectl label secret $DOCKER_SECRET_NAME -n $NAMESPACE tfm/secret-type=regcred",
+		"kubectl annotate secret $DOCKER_SECRET_NAME -n $NAMESPACE tfm/registry-url=299166832260.dkr.ecr.${ECR_REGION}.amazonaws.com",
 		"echo \"Secret was successfully updated at $(date)\"",
 	}
 

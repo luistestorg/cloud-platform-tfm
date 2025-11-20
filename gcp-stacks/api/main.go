@@ -3,12 +3,12 @@ package main
 import (
 	"fmt"
 
-	"tracemachina.com/shared"
+	"unir-tfm.com/shared"
 
 	"github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
-	globalStack "tracemachina.com/stack"
+	globalStack "unir-tfm.com/shared-gcp"
 )
 
 func main() {
@@ -25,7 +25,7 @@ func main() {
 			return err
 		}
 
-		sharedStackName := fmt.Sprintf("tracemachina/nativelink-shared/%v", ctx.Stack())
+		sharedStackName := fmt.Sprintf("tfm/shared/%v", ctx.Stack())
 		sharedbaseStackRef, err := pulumi.NewStackReference(ctx, sharedStackName, nil)
 		if err != nil {
 			return err
@@ -66,7 +66,7 @@ func main() {
 
 		apiConfig.SQLZone = sqlZoneRef.Value.(string)
 
-		//From nativelink-shared
+		//From tfm-shared
 		SharedRedisZoneRef, err := sharedbaseStackRef.GetOutputDetails("SharedRedisZone")
 		if err != nil {
 			return err
@@ -227,7 +227,7 @@ func main() {
 			return err
 		}
 
-		if err = apiConfig.DeployNativeLinkCrossplane(ctx, s); err != nil {
+		if err = apiConfig.DeployCrossplane(ctx, s); err != nil {
 			return err
 		}
 

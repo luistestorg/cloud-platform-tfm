@@ -6,8 +6,8 @@ import (
 	"github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
-	"tracemachina.com/shared"
-	globalStack "tracemachina.com/stack"
+	"unir-tfm.com/shared"
+	globalStack "unir-tfm.com/shared-gcp"
 )
 
 func main() {

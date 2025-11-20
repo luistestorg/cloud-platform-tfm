@@ -27,7 +27,7 @@ type (
 
 		SharedRedisStorageClass string
 
-		CreateSharedNativeLinkNamespace bool
+		CreateSharedTfmNamespace bool
 		SharedRedisZone                 string
 		SharedRedisSize                 string
 		MtRedisSize                     string
@@ -303,7 +303,7 @@ func (nlSharedStack *NLSharedStack) deployMultiTenantRedis(ctx *pulumi.Context, 
 }
 
 func (nlSharedStack *NLSharedStack) DeploySharedNamespace(ctx *pulumi.Context, s *Stack) error {
-	ns, err := s.CreateNamespace(ctx, "nativelink-shared")
+	ns, err := s.CreateNamespace(ctx, "tfm-shared")
 	if err != nil {
 		return err
 	}
@@ -317,7 +317,7 @@ func (nlSharedStack *NLSharedStack) DeploySharedNamespace(ctx *pulumi.Context, s
 		return err
 	}
 
-	mtNs, err := s.CreateNamespace(ctx, "nativelink-shared-mt")
+	mtNs, err := s.CreateNamespace(ctx, "tfm-shared-mt")
 	if err != nil {
 		return err
 	}

@@ -80,7 +80,7 @@ type (
 		ClusterRedisStorageClass string
 		ClusterRedisZone         string
 
-		CreateSharedNativeLinkNamespace  bool
+		CreateSharedTfmNamespace  bool
 		CreateRunbooksNamespace          bool
 		SharedRedisSize                  string
 		MtRedisSize                      string
@@ -227,9 +227,9 @@ func main() {
 			return err
 		}
 
-		fmt.Printf("CreateSharedNativeLinkNamespace? %t\n", nlSharedCfg.CreateSharedNativeLinkNamespace)
-		if nlSharedCfg.CreateSharedNativeLinkNamespace {
-			// we need to create the nativelink-shared namespace and wildcard cert ...
+		fmt.Printf("CreateSharedTfmNamespace? %t\n", nlSharedCfg.CreateSharedTfmNamespace)
+		if nlSharedCfg.CreateSharedTfmNamespace {
+			// we need to create the tfm-shared namespace and wildcard cert ...
 			// the API creates the NativeLink claim (since it does that for all other claims)
 			if err = nlSharedCfg.DeploySharedNamespace(ctx, s); err != nil {
 				return err
@@ -433,8 +433,8 @@ func initSelfServiceApiConfig(cfg *config.Config) *shared.SelfServiceAPIConfig {
 		ssApiCfg.DbOffsiteBackupGCSKeyFile = cfg.RequireSecret("dbOffsiteBackupGCSKey")
 	}
 
-	if ssApiCfg.APIEnabled && ssApiCfg.NativeLinkDbEnabled {
-		ssApiCfg.NativelinkDbPassword = cfg.RequireSecret("nativelinkDbPassword")
+	if ssApiCfg.APIEnabled && ssApiCfg.TfmDbEnabled {
+		ssApiCfg.TfmDbPassword = cfg.RequireSecret("tfmDbPassword")
 	}
 
 	ssApiCfg.GithubAuthToken = cfg.RequireSecret("githubAuthToken")
@@ -824,7 +824,7 @@ func DeployControlPlaneComponents(ctx *pulumi.Context, s *shared.Stack, ekscfg *
 		return err
 	}
 
-	if err = ssAPICfg.DeployNativeLinkCrossplane(ctx, s); err != nil {
+	if err = ssAPICfg.DeployCrossplane(ctx, s); err != nil {
 		return err
 	}
 

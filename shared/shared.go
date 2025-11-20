@@ -23,7 +23,7 @@ import (
 	rbacv1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/rbac/v1"
 	schedulingv1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/scheduling/v1"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
-	resourceDef "tracemachina.com/resources"
+	resourceDef "unir-tfm.com/resources"
 )
 
 const (
@@ -129,7 +129,7 @@ func nodeTolerationsByPlatformAndDistruptionType(platform string, disruptable bo
 		return pulumi.Array{
 			pulumi.Map{
 				"effect":   pulumi.String("NoSchedule"),
-				"key":      pulumi.String("nativelink/tolerates-spot"),
+				"key":      pulumi.String("tfm/tolerates-spot"),
 				"operator": pulumi.String("Exists"),
 			},
 		}
@@ -137,7 +137,7 @@ func nodeTolerationsByPlatformAndDistruptionType(platform string, disruptable bo
 	return pulumi.Array{
 		pulumi.Map{
 			"effect":   pulumi.String("NoSchedule"),
-			"key":      pulumi.String("nativelink/not-disruptable"),
+			"key":      pulumi.String("tfm/not-disruptable"),
 			"operator": pulumi.String("Exists"),
 		},
 	}
@@ -651,7 +651,7 @@ func (s *Stack) DeployRunbooks(ctx *pulumi.Context, ssAPICfg *SelfServiceAPIConf
 			Containers: corev1.ContainerArray{oauth2ProxyContainer, runbooksContainer},
 			Tolerations: corev1.TolerationArray{
 				corev1.TolerationArgs{
-					Key:      pulumi.String("nativelink/tolerates-spot"),
+					Key:      pulumi.String("tfm/tolerates-spot"),
 					Operator: pulumi.String("Exists"),
 					Effect:   pulumi.String("NoSchedule"),
 				},

@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: offsite-db-backup-cronjob
-  namespace: nativelink-api
+  namespace: tfm-api
 spec:
   schedule: "*/30 * * * *"
   concurrencyPolicy: "Replace"

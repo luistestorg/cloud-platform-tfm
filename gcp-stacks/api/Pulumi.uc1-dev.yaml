@@ -2,7 +2,7 @@ config:
   gcp:project: cloud-platform-tfm
   api:project: cloud-platform-tfm
   api:apiEnabled: "true"
-  api:apiImage: "us-central1-docker.pkg.dev/native-link-cloud/tfm-images/tfm-api:dev"
+  api:apiImage: "us-central1-docker.pkg.dev/cloud-platform-tfm/tfm-images/tfm-api:dev"
   api:SegmentApiEnabled: "false"
   api:enableTemporal: "true"
   api:pgUsername: "tfmssapidb"  
@@ -10,7 +10,7 @@ config:
   api:globalStack: uc1-dev
   api:ecrRegion: "us-east-2"
   api:awsRegion: "us-west-2"
-  api:profile: "NativeLinkCloudGKEAccess"
+  api:profile: "TFMCloudGKEAccess"
   api:gcpAWSRoleArn: "arn:aws:iam::299166832260:role/gke-cloud-platform-tfm-deployer"
   api:gcpAWSSub: "115077250155057901318"  
   api:oauth2CookieSecret:

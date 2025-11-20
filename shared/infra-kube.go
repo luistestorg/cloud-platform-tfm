@@ -249,7 +249,7 @@ sharing:
 // Required for auth cert-manager with clouddns
 func (s *Stack) LinkCertManagerSa(ctx *pulumi.Context, gkeServiceAccount string) error {
 
-	/* kubectl annotate serviceaccount --namespace=cert-manager cert-manager  "iam.gke.io/gcp-service-account=gke-cloud-platform-deployer@native-link-cloud.iam.gserviceaccount.com"*/
+	/* kubectl annotate serviceaccount --namespace=cert-manager cert-manager  "iam.gke.io/gcp-service-account=gke-cloud-platform-deployer@cloud-platform-tfm.iam.gserviceaccount.com"*/
 
 	cmSaPatch, err := corev1.NewServiceAccountPatch(ctx, "cert-manager-annotation", &corev1.ServiceAccountPatchArgs{
 		Metadata: &metav1.ObjectMetaPatchArgs{

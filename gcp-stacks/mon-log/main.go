@@ -3,12 +3,12 @@ package main
 import (
 	"fmt"
 
-	"tracemachina.com/shared"
+	"unir-tfm.com/shared"
 
 	"github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
-	globalStack "tracemachina.com/stack"
+	globalStack "unir-tfm.com/shared-gcp"
 )
 
 func main() {
@@ -154,7 +154,6 @@ func initMonConfig(cfg *config.Config) *shared.MonSharedStack {
 	monSharedStack.BootstrapAdminPassword = cfg.RequireSecret("bootstrapAdminPassword")
 
 	monSharedStack.EnableElasticSearch = cfg.GetBool("EnableElasticSearch")
-	monSharedStack.EnableOTEL = cfg.GetBool("EnableElasticSearch")
 	monSharedStack.ElasticSearchPassword = cfg.RequireSecret("elasticSearchPassword")
 	monSharedStack.KibanaPassword = cfg.RequireSecret("kibanaPassword")
 

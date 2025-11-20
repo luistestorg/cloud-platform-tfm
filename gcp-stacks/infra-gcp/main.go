@@ -6,7 +6,7 @@ import (
 	"github.com/pulumi/pulumi-gcp/sdk/v8/go/gcp/container"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
-	globalStack "tracemachina.com/stack"
+	globalStack "unir-tfm.com/shared-gcp"
 )
 
 type (

@@ -332,7 +332,7 @@ func (ciSupportStack *CiSupportSharedStack) DeployBuildBarn(ctx *pulumi.Context,
 			Containers: corev1.ContainerArray{oauth2ProxyContainerBrowser, buildbarnBrowserContainer},
 			Tolerations: corev1.TolerationArray{
 				&corev1.TolerationArgs{
-					Key:      pulumi.String("nativelink/tolerates-spot"),
+					Key:      pulumi.String("tfm/tolerates-spot"),
 					Operator: pulumi.String("Exists"),
 					Effect:   pulumi.String("NoSchedule"),
 				},
@@ -510,7 +510,7 @@ func (ciSupportStack *CiSupportSharedStack) DeployBuildBarn(ctx *pulumi.Context,
 			Containers: corev1.ContainerArray{buildbarnFrontEndContainer},
 			Tolerations: corev1.TolerationArray{
 				&corev1.TolerationArgs{
-					Key:      pulumi.String("nativelink/tolerates-spot"),
+					Key:      pulumi.String("tfm/tolerates-spot"),
 					Operator: pulumi.String("Exists"),
 					Effect:   pulumi.String("NoSchedule"),
 				},
@@ -699,7 +699,7 @@ func (ciSupportStack *CiSupportSharedStack) DeployBuildBarn(ctx *pulumi.Context,
 			Containers: corev1.ContainerArray{oauth2ProxyContainerScheduler, schedulerContainer},
 			Tolerations: corev1.TolerationArray{
 				&corev1.TolerationArgs{
-					Key:      pulumi.String("nativelink/tolerates-spot"),
+					Key:      pulumi.String("tfm/tolerates-spot"),
 					Operator: pulumi.String("Exists"),
 					Effect:   pulumi.String("NoSchedule"),
 				},
@@ -860,7 +860,7 @@ func (ciSupportStack *CiSupportSharedStack) DeployBuildBarn(ctx *pulumi.Context,
 			InitContainers: corev1.ContainerArray{volumeStorageInitContainer},
 			Tolerations: corev1.TolerationArray{
 				&corev1.TolerationArgs{
-					Key:      pulumi.String("nativelink/tolerates-spot"),
+					Key:      pulumi.String("tfm/tolerates-spot"),
 					Operator: pulumi.String("Exists"),
 					Effect:   pulumi.String("NoSchedule"),
 				},
@@ -1162,7 +1162,7 @@ func (ciSupportStack *CiSupportSharedStack) DeployBuildBarn(ctx *pulumi.Context,
 			Containers:     corev1.ContainerArray{workerContainer, runnerContainer},
 			Tolerations: corev1.TolerationArray{
 				&corev1.TolerationArgs{
-					Key:      pulumi.String("nativelink/tolerates-spot"),
+					Key:      pulumi.String("tfm/tolerates-spot"),
 					Operator: pulumi.String("Exists"),
 					Effect:   pulumi.String("NoSchedule"),
 				},

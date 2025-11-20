@@ -1078,7 +1078,7 @@ func (monSharedStack *MonSharedStack) DeployOTELCollector(ctx *pulumi.Context, s
 }
 
 func (monSharedStack *MonSharedStack) DeployCustomDashboards(ctx *pulumi.Context, s *Stack) error {
-	dashboards := []string{"nativelink", "ingress", "redis", "redis-thanos", "node-exporter-full"}
+	dashboards := []string{"tfm", "ingress", "redis", "redis-thanos", "node-exporter-full"}
 	if s.Platform == "aws" {
 		dashboards = append(dashboards, "karpenter", "s3")
 	}

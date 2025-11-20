@@ -2,16 +2,16 @@ module gcp-stack
 
 go 1.22.4
 
-replace tracemachina.com/stack => ./stack
+replace unir-tfm.com/shared-gcp => ./shared-gcp
 
-replace tracemachina.com/resources => ../nativelink-cloud/resources/
+replace unir-tfm.com/resources => ../resources/
 
-replace tracemachina.com/shared => ../nativelink-cloud/shared/
+replace unir-tfm.com/shared => ../shared/
 
 require (
 	github.com/pulumi/pulumi-gcp/sdk/v8 v8.29.0
 	github.com/pulumi/pulumi/sdk/v3 v3.167.0
-	tracemachina.com/stack v0.0.0
+	unir-tfm.com/shared-gcp v0.0.0
 )
 
 require (

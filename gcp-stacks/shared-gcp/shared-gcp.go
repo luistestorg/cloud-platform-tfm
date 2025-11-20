@@ -6,20 +6,34 @@ import (
 )
 
 const (
-	GlobalHelmChartPath           = "../../helm-charts"
-	GlobalDashboardPath           = "../../config/dashboards"
-	GlobalKibanaDashboardPath     = "../../config/dashboards/%s-dashboards.ndjson"
-	GlobalConfigPath              = "../../config"
-	GlobalCrossplanePath          = "../../crossplane/"
-	GlobalGKEServiceAccount       = "gke-cloud-platform-deployer@cloud-platform-tfm.iam.gserviceaccount.com"
-	GlobalWorkloadIdentityPool    = "cloud-platform-tfm.svc.id.goog"
-	GlobalClusterIssuer           = "letsencrypt-tls-issuer"
-	Platform                      = "gke"
-	GlobalPriorityClassName       = "tfm-high-priority"
-	GlobalPriorityClassValue      = 1000000000
+	// Paths relativos al proyecto
+	GlobalHelmChartPath       = "../../helm-charts"
+	GlobalDashboardPath       = "../../config/dashboards"
+	GlobalKibanaDashboardPath = "../../config/dashboards/%s-dashboards.ndjson"
+	GlobalConfigPath          = "../../config"
+	GlobalCrossplanePath      = "../../crossplane/"
+
+	// Configuración de GCP para el proyecto TFM
+	GlobalGKEServiceAccount    = "gke-cloud-platform-deployer@cloud-platform-tfm.iam.gserviceaccount.com"
+	GlobalWorkloadIdentityPool = "cloud-platform-tfm.svc.id.goog"
+
+	// Configuración de certificados y plataforma
+	GlobalClusterIssuer = "letsencrypt-tls-issuer"
+	Platform            = "gke"
+
+	// Priority classes
+	GlobalPriorityClassName  = "tfm-high-priority"
+	GlobalPriorityClassValue = 1000000000
+
+	// Repositorio de imágenes Temporal
 	GlobalTemporalImageRepository = "us-central1-docker.pkg.dev/cloud-platform-tfm/tfm"
+
+	// Constantes adicionales para el proyecto TFM
+	ProjectID   = "cloud-platform-tfm"
+	ProjectName = "cloud-platform-tfm"
 )
 
+// GenerateKubeconfig genera la configuración de kubeconfig para conectarse al cluster GKE
 func GenerateKubeconfig(clusterEndpoint pulumi.StringOutput, clusterName pulumi.StringOutput,
 	clusterMasterAuth container.ClusterMasterAuthOutput) pulumi.StringOutput {
 	context := pulumi.Sprintf("%s", clusterName)

@@ -33,7 +33,7 @@ const (
 	crossplaneAwsProviderVers        = "v0.51.5"
 	crossplaneHelmProviderVers       = "v0.20.4"
 
-	claimsPriorityClassName  = "nativelink-high-priority"
+	claimsPriorityClassName  = "tfm-high-priority"
 	claimsPriorityClassValue = 1000000000
 )
 
@@ -61,7 +61,7 @@ type (
 		DbOffsiteBackupGCSKeyFile     pulumi.StringOutput
 		SegmentAPIWriteKey            pulumi.StringOutput
 		SegmentAPIEnabled             bool
-		NativeLinkImage               string
+		TfmImage               string
 		SharedRedisZone               string
 		SQLZone                       string
 		dependsOn                     []pulumi.Resource
@@ -70,8 +70,8 @@ type (
 		AwsAccessKeyID                pulumi.StringOutput
 		AwsSecretAccessKey            pulumi.StringOutput
 		GithubAuthToken               pulumi.StringOutput
-		NativeLinkDbEnabled           bool
-		NativelinkDbPassword          pulumi.StringOutput
+		TfmDbEnabled           bool
+		TfmDbPassword          pulumi.StringOutput
 		ClusterID                     string
 		ChangelogTip                  string
 		EnableSlackNotifications      bool
@@ -89,7 +89,7 @@ type (
 )
 
 func (ssApiCfg *SelfServiceAPIConfig) DeploySelfServiceAPI(ctx *pulumi.Context, s *Stack) error {
-	ns, err := s.CreateNamespace(ctx, "nativelink-api")
+	ns, err := s.CreateNamespace(ctx, "tfm-api")
 	if err != nil {
 		return err
 	}
@@ -106,8 +106,8 @@ func (ssApiCfg *SelfServiceAPIConfig) DeploySelfServiceAPI(ctx *pulumi.Context, 
 	}
 
 	passwordData := pulumi.StringMap{"postgres-password": ssApiCfg.PgPassword, "password": ssApiCfg.DbPassword}
-	if ssApiCfg.NativeLinkDbEnabled {
-		passwordData["nativelink-password"] = ssApiCfg.NativelinkDbPassword
+	if ssApiCfg.TfmDbEnabled {
+		passwordData["nativelink-password"] = ssApiCfg.TfmDbPassword
 	}
 
 	pgSecret, err := corev1.NewSecret(ctx, "postgres", &corev1.SecretArgs{
@@ -316,7 +316,7 @@ func (ssApiCfg *SelfServiceAPIConfig) DeploySelfServiceAPI(ctx *pulumi.Context, 
 
 	}
 
-	imageID := ssApiCfg.NativeLinkImage
+	imageID := ssApiCfg.TfmImage
 	apiEnvDataMap := pulumi.StringMap{
 		"APP_BASE_URL":         pulumi.String("http://localhost:8000"),
 		"TZ":                   pulumi.String("UTC"),
@@ -366,7 +366,7 @@ func (ssApiCfg *SelfServiceAPIConfig) DeploySelfServiceAPI(ctx *pulumi.Context, 
 		apiEnvDataMap["AWS_REGION"] = pulumi.String(ssApiCfg.AwsRegion)
 		apiEnvDataMap["GITHUB_CLUSTER_ID"] = pulumi.String(ssApiCfg.ClusterID) // used for changelog tracking
 		apiEnvDataMap["K8S_TYPE"] = pulumi.String("gke")
-		apiEnvDataMap["WORKER_IMAGE_REPO"] = pulumi.String("us-docker.pkg.dev/native-link-cloud/aws-remote")
+		apiEnvDataMap["WORKER_IMAGE_REPO"] = pulumi.String("us-docker.pkg.dev/cloud-platform-tfm/aws-remote")
 	}
 	apiEnvDataMap["SHARED_CAS_ZONE"] = pulumi.String(ssApiCfg.SharedRedisZone)
 
@@ -691,7 +691,7 @@ func (ssApiCfg *SelfServiceAPIConfig) DeploySelfServiceAPI(ctx *pulumi.Context, 
 			ImagePullSecrets:   pullSecrets,
 			Tolerations: corev1.TolerationArray{
 				corev1.TolerationArgs{
-					Key:      pulumi.String("nativelink/not-disruptable"),
+					Key:      pulumi.String("tfm/not-disruptable"),
 					Operator: pulumi.String("Exists"),
 					Effect:   pulumi.String("NoSchedule"),
 				},
@@ -750,7 +750,7 @@ func (ssApiCfg *SelfServiceAPIConfig) DeploySelfServiceAPI(ctx *pulumi.Context, 
 		"nginx.org/websocket-services":                   "api",
 	}
 
-	host, err := s.CreateIngress(ctx, apiSubDomain, "nativelink-api", "api", 8888, ingressAnnotations)
+	host, err := s.CreateIngress(ctx, apiSubDomain, "tfm-api", "api", 8888, ingressAnnotations)
 	if err != nil {
 		return err
 	}
@@ -1006,7 +1006,7 @@ func (ssApiCfg *SelfServiceAPIConfig) createAPIIRSA(ctx *pulumi.Context, saName 
 
 	serviceAccount := awsiam.EKSServiceAccountArgs{
 		Name:            pulumi.String(s.ClusterName),
-		ServiceAccounts: pulumi.ToStringArray([]string{fmt.Sprintf("nativelink-api:%s", saName)}),
+		ServiceAccounts: pulumi.ToStringArray([]string{fmt.Sprintf("tfm-api:%s", saName)}),
 	}
 
 	roleName := s.ClusterScopedResourceName("cloud-api-irsa")
@@ -1087,7 +1087,7 @@ func (apiConfig *SelfServiceAPIConfig) createCrossplaneKubernetesProvider(ctx *p
 			  },
 			  "tolerations": [
 				{
-				  "key": "nativelink/not-disruptable",
+				  "key": "tfm/not-disruptable",
 				  "operator": "Exists",
 				  "effect": "NoSchedule"
 				}
@@ -1352,7 +1352,7 @@ func (apiConfig *SelfServiceAPIConfig) createCrossplaneGCPProvider(ctx *pulumi.C
 	// Provider Config
 	providerConfigSpec, _ := JSONToMap(`{
 	  "spec": {
-	  	"projectID" :  "native-link-cloud",
+	  	"projectID" :  "cloud-platform-tfm",
 		"credentials": {
 			"source": "InjectedIdentity"
 		}
@@ -1370,9 +1370,9 @@ func (apiConfig *SelfServiceAPIConfig) createCrossplaneGCPProvider(ctx *pulumi.C
 }
 
 // deploy the nativelink crossplane CompositeResourceDefinition and Composition (one big yaml)
-func (apiConfig *SelfServiceAPIConfig) DeployNativeLinkCrossplane(ctx *pulumi.Context, s *Stack) error {
-	cf, err := yaml.NewConfigFile(ctx, "nativelink-aws-xp-yaml", &yaml.ConfigFileArgs{
-		File: fmt.Sprintf("%s/nativelink-aws-xp.yaml", s.GlobalCrossplanePath),
+func (apiConfig *SelfServiceAPIConfig) DeployCrossplane(ctx *pulumi.Context, s *Stack) error {
+	cf, err := yaml.NewConfigFile(ctx, "tfm-aws-xp-yaml", &yaml.ConfigFileArgs{
+		File: fmt.Sprintf("%s/tfm-aws-xp.yaml", s.GlobalCrossplanePath),
 	}, pulumi.Provider(s.K8sProvider), pulumi.DependsOn(apiConfig.dependsOn))
 	if err != nil {
 		return err
