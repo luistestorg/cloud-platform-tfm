@@ -1,0 +1,6 @@
+name: eks-infra-kube
+runtime:
+  name: go
+  options:
+    binary: infra-kube
+description: EKS Kubernetes cluster with Managed Node Groups and EBS CSI Driver

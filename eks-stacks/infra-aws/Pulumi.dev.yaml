@@ -1,0 +1,15 @@
+config:
+  aws:region: us-west-2
+  eks-infra-kube:environment: dev
+  eks-infra-kube:projectName: cloud-platform-tfm
+  eks-infra-kube:k8sVersion: "1.29"
+  eks-infra-kube:controlPlaneInstanceType: t3.medium
+  eks-infra-kube:managedNodeGroupName: tfm-dev-ng
+  eks-infra-kube:managedNodeGroupMinSize: 2
+  eks-infra-kube:managedNodeGroupMaxSize: 4
+  eks-infra-kube:managedNodeGroupDesiredSize: 2
+  eks-infra-kube:diskSize: 50
+  eks-infra-kube:awsAuthIamAdminRole: AdminRole
+  eks-infra-kube:awsAuthIamReadOnlyRole: ReadOnlyRole
+  eks-infra-kube:logGroupRetention: 7
+  eks-infra-kube:infraStackRef: organization/eks-infra-aws/dev

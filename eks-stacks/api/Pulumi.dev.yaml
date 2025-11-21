@@ -1,0 +1,8 @@
+config:
+  aws:region: us-west-2
+  eks-api:environment: dev
+  eks-api:projectName: cloud-platform-tfm
+  eks-api:enableAwsGatewayController: true
+  eks-api:domain: example.com
+  eks-api:route53ZoneId: Z1234567890ABC
+  eks-api:infraKubeStackRef: organization/eks-infra-kube/dev

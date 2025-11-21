@@ -1,0 +1,6 @@
+name: eks-mon-log
+runtime:
+  name: go
+  options:
+    binary: mon-log
+description: Monitoring and Logging stack - Prometheus, Grafana, and basic logging

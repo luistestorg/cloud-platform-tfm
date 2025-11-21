@@ -1,0 +1,23 @@
+config:
+  aws:region: us-west-2
+  eks-mon-log:environment: dev
+  eks-mon-log:projectName: cloud-platform-tfm
+  # Prometheus configuration
+  eks-mon-log:prometheusStorage: 20Gi
+  eks-mon-log:prometheusStorageClass: gp3-enc
+  eks-mon-log:prometheusRetention: 7d
+  eks-mon-log:prometheusReplicas: 1
+  # Grafana configuration
+  eks-mon-log:grafanaStorage: 10Gi
+  eks-mon-log:grafanaStorageClass: gp3-enc
+  eks-mon-log:grafanaAdminPassword:
+    secure: XXXXXX
+  # Loki + Promtail for log aggregation
+  eks-mon-log:enableLoki: true
+  eks-mon-log:lokiStorage: 10Gi
+  eks-mon-log:lokiStorageClass: gp3-enc
+  eks-mon-log:lokiRetention: 168h
+  # AlertManager
+  eks-mon-log:enableAlertManager: true
+  # Stack references
+  eks-mon-log:infraKubeStackRef: organization/eks-infra-kube/dev

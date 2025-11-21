@@ -1,0 +1,6 @@
+name: eks-ci-support
+runtime:
+  name: go
+  options:
+    binary: ci-support
+description: CI/CD support tools including GitHub Actions runners for EKS

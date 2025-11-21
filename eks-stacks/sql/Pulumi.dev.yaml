@@ -1,0 +1,13 @@
+config:
+  aws:region: us-west-2
+  eks-sql:infraStackRef: organization/eks-infra-aws/dev
+  eks-sql:dbName: tfmdb
+  eks-sql:dbInstanceType: db.t4g.small
+  eks-sql:dbEngineVersion: "16.3"
+  eks-sql:dbStorage: 100
+  eks-sql:zone: us-west-2a
+  eks-sql:backupRetention: 7
+  eks-sql:dbPassword:
+    secure: XXXXXXXXXX
+  eks-sql:pgPassword:
+    secure: XXXXXXXXXX

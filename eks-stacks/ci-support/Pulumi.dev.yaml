@@ -1,0 +1,7 @@
+config:
+  aws:region: us-west-2
+  eks-ci-support:environment: dev
+  eks-ci-support:projectName: cloud-platform-tfm
+  eks-ci-support:enableActionsRunnerController: true
+  eks-ci-support:githubOrg: your-org
+  eks-ci-support:infraKubeStackRef: organization/eks-infra-kube/dev

@@ -1,0 +1,10 @@
+name: eks-sql
+runtime:
+  name: go
+  options:
+    binary: sql
+description: RDS PostgreSQL instance for TFM application
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: aws-go

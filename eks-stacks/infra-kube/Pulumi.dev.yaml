@@ -1,0 +1,9 @@
+config:
+  aws:region: us-west-2
+  eks-infra-kube:infraAwsStack: organization/eks-infra-aws/dev
+  eks-infra-kube:clusterName: tfm-dev
+  eks-infra-kube:k8sVersion: "1.30"
+  eks-infra-kube:instanceType: m6i.large
+  eks-infra-kube:minSize: 2
+  eks-infra-kube:maxSize: 4
+  eks-infra-kube:desiredCapacity: 2

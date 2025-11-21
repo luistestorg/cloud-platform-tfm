@@ -1,0 +1,6 @@
+name: eks-api
+runtime:
+  name: go
+  options:
+    binary: api
+description: AWS Gateway Controller, Ingress, and API routing for EKS
