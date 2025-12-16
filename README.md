@@ -343,11 +343,10 @@ Este proyecto es parte de un Trabajo de Fin de Máster (TFM) y se distribuye con
 
 ## 👥 Autor
 
-**Luis Ccari**
+**Luis Muñoz**
 - Máster en Ingeniería de Software
-- Universidad: [Nombre de Universidad]
-- Email: [tu-email]
-- LinkedIn: [tu-linkedin]
+- Universidad: UNIR
+- Email: lmunozes@gmail.com
 
 ## 🙏 Agradecimientos
 
