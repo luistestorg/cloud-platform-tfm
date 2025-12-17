@@ -4,7 +4,7 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
 
-	"tracemachina.com/shared"
+	"unir-tfm.com/shared"
 )
 
 type CiSupportConfig struct {
@@ -79,13 +79,6 @@ func DeployCiSupportComponents(ctx *pulumi.Context, s *shared.Stack, ciCfg *shar
 		}
 	}
 
-	// Deploy Tekton if enabled
-	if ciCfg.EnableTekton {
-		if err := deployTekton(ctx, s); err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
@@ -100,7 +93,7 @@ func deployActionsRunnerController(ctx *pulumi.Context, s *shared.Stack, ciCfg *
 	// Deploy actions-runner-controller helm chart
 	customValues := pulumi.Map{
 		"authSecret": pulumi.Map{
-			"create": pulumi.Bool(true),
+			"create":                     pulumi.Bool(true),
 			"github_app_id":              ciCfg.GithubActionsAppID,
 			"github_app_installation_id": ciCfg.GithubActionsAppInstID,
 			"github_app_private_key":     ciCfg.GithubActionsPrivateKey,
@@ -108,24 +101,6 @@ func deployActionsRunnerController(ctx *pulumi.Context, s *shared.Stack, ciCfg *
 	}
 
 	_, err = s.DeployHelmRelease(ctx, ns, "actions-runner-controller", shared.ActionsRunnerControllerChartVers, "", "", customValues)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// deployTekton deploys Tekton pipelines
-func deployTekton(ctx *pulumi.Context, s *shared.Stack) error {
-	ns, err := s.CreateNamespace(ctx, "tekton-pipelines")
-	if err != nil {
-		return err
-	}
-	s.DependsOn = append(s.DependsOn, ns)
-
-	// Deploy Tekton pipelines
-	customValues := pulumi.Map{}
-	_, err = s.DeployHelmRelease(ctx, ns, "tekton-pipelines", shared.TektonPipelinesChartVers, "", "", customValues)
 	if err != nil {
 		return err
 	}

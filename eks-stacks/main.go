@@ -29,7 +29,7 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
 
-	"tracemachina.com/shared"
+	"unir-tfm.com/shared"
 )
 
 const (
@@ -80,7 +80,7 @@ type (
 		ClusterRedisStorageClass string
 		ClusterRedisZone         string
 
-		CreateSharedTfmNamespace  bool
+		CreateSharedTfmNamespace         bool
 		CreateRunbooksNamespace          bool
 		SharedRedisSize                  string
 		MtRedisSize                      string

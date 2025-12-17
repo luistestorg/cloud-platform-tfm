@@ -17,7 +17,7 @@ func main() {
 		cfg := config.New(ctx, "")
 		monSharedStack := initMonConfig(cfg)
 
-		baseStackName := fmt.Sprintf("tracemachina/gcp-stack/%v", cfg.Require("globalStack"))
+		baseStackName := fmt.Sprintf("tfm/gcp-stack/%v", cfg.Require("globalStack"))
 		baseStackRef, err := pulumi.NewStackReference(ctx, baseStackName, nil)
 		if err != nil {
 			return err

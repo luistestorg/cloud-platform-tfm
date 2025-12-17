@@ -20,7 +20,7 @@ func main() {
 		cfg := config.New(ctx, "")
 		ciSupportCfg, enableUISecretUpdater, uiNamespace := initCiSupportConfig(cfg)
 
-		baseStackName := fmt.Sprintf("tracemachina/gcp-stack/%v", cfg.Require("globalStack"))
+		baseStackName := fmt.Sprintf("tfm/gcp-stack/%v", cfg.Require("globalStack"))
 		baseStackRef, err := pulumi.NewStackReference(ctx, baseStackName, nil)
 		if err != nil {
 			return err
@@ -39,7 +39,7 @@ func main() {
 		}
 		env := envRef.Value.(string)
 
-		monLogStackName := fmt.Sprintf("tracemachina/mon-log/%v", ctx.Stack())
+		monLogStackName := fmt.Sprintf("tfm/mon-log/%v", ctx.Stack())
 		monLogStackRef, err := pulumi.NewStackReference(ctx, monLogStackName, nil)
 		if err != nil {
 			return err
@@ -90,7 +90,7 @@ func main() {
 			Oauth2TokenURL:     Oauth2TokenURLRef.Value.(string),
 		}
 
-		infraKubeStackName := fmt.Sprintf("tracemachina/infra-kube/%v", ctx.Stack())
+		infraKubeStackName := fmt.Sprintf("tfm/infra-kube/%v", ctx.Stack())
 		infraKubeStackRef, err := pulumi.NewStackReference(ctx, infraKubeStackName, nil)
 
 		if err != nil {

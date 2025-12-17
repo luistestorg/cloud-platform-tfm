@@ -5,8 +5,7 @@ config:
   api:apiImage: "us-central1-docker.pkg.dev/cloud-platform-tfm/tfm-images/tfm-api:dev"
   api:SegmentApiEnabled: "false"
   api:enableTemporal: "true"
-  api:pgUsername: "tfmssapidb"  
-  api:nativeLinkImage: "ghcr.io/tracemachina/cloud-platform-tfm:db22y8nkyyly28ikw4x40qlh8273mw9g"
+  api:pgUsername: "tfmssapidb" 
   api:globalStack: uc1-dev
   api:ecrRegion: "us-east-2"
   api:awsRegion: "us-west-2"

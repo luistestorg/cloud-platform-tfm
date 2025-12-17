@@ -120,8 +120,7 @@ function init_sub_stack() {
     pulumi config set -s "${stackName}" --secret api:oauth2CookieSecret "${oauth2CookieSecret}" -C "${subStackDir}"
     pulumi config set -s "${stackName}" --secret api:cachePassword "${cachePassword}" -C "${subStackDir}"
     pulumi config set -s "${stackName}" --secret api:sharedCachePassword "${sharedCachePassword}" -C "${subStackDir}"
-    #Get this from 1password https://start.1password.com/open/i?a=NSXIQQENTNHTLJSLS7Y5SIUZNY&v=wymdcm3xv76bewdn6lqytamazi&i=prhu7meamucd4zksjfohcabr6a&h=tracemachina.1password.com
-    #Or using the CloudEngSA Access Keys and executing `aws --profile --region us-east-2 cloudeng-access ecr get-login-password`
+    
     pulumi config set -s "${stackName}" --secret api:awsAccessKeyId "${AWS_ACCESS_KEY_ID}" -C "${subStackDir}"
     pulumi config set -s "${stackName}" --secret api:awsSecretAccessKey "${AWS_SECRET_ACCESS_KEY}" -C "${subStackDir}"
     # TODO: not sure if this is needed ~ pulumi config set -s "${stackName}" aws:region us-west-2 -C "${subStackDir}"

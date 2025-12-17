@@ -16,21 +16,21 @@ func main() {
 		cfg := config.New(ctx, "")
 		tlsCfg := InitTLSConfig(cfg)
 
-		baseStackName := fmt.Sprintf("tracemachina/gcp-stack/%v", cfg.Require("globalStack"))
+		baseStackName := fmt.Sprintf("tfm/gcp-stack/%v", cfg.Require("globalStack"))
 		baseStackRef, err := pulumi.NewStackReference(ctx, baseStackName, nil)
 
 		if err != nil {
 			return err
 		}
 
-		infraStackName := fmt.Sprintf("tracemachina/infra-gcp/%v", ctx.Stack())
+		infraStackName := fmt.Sprintf("tfm/infra-gcp/%v", ctx.Stack())
 		infraStackRef, err := pulumi.NewStackReference(ctx, infraStackName, nil)
 
 		if err != nil {
 			return err
 		}
 
-		monlogStackName := fmt.Sprintf("tracemachina/mon-log/%v", ctx.Stack())
+		monlogStackName := fmt.Sprintf("tfm/mon-log/%v", ctx.Stack())
 		monlogStackRef, err := pulumi.NewStackReference(ctx, monlogStackName, nil)
 
 		if err != nil {

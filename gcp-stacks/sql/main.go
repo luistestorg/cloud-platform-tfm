@@ -27,7 +27,7 @@ func main() {
 
 		sqlConfig := config.New(ctx, "")
 
-		globalStackName := fmt.Sprintf("tracemachina/gcp-stack/%v", sqlConfig.Require("globalStack"))
+		globalStackName := fmt.Sprintf("tfm/gcp-stack/%v", sqlConfig.Require("globalStack"))
 		stackRef, err := pulumi.NewStackReference(ctx, globalStackName, nil)
 		if err != nil {
 			return err

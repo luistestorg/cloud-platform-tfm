@@ -61,7 +61,7 @@ type (
 		DbOffsiteBackupGCSKeyFile     pulumi.StringOutput
 		SegmentAPIWriteKey            pulumi.StringOutput
 		SegmentAPIEnabled             bool
-		TfmImage               string
+		TfmImage                      string
 		SharedRedisZone               string
 		SQLZone                       string
 		dependsOn                     []pulumi.Resource
@@ -70,8 +70,8 @@ type (
 		AwsAccessKeyID                pulumi.StringOutput
 		AwsSecretAccessKey            pulumi.StringOutput
 		GithubAuthToken               pulumi.StringOutput
-		TfmDbEnabled           bool
-		TfmDbPassword          pulumi.StringOutput
+		TfmDbEnabled                  bool
+		TfmDbPassword                 pulumi.StringOutput
 		ClusterID                     string
 		ChangelogTip                  string
 		EnableSlackNotifications      bool
@@ -1367,16 +1367,4 @@ func (apiConfig *SelfServiceAPIConfig) createCrossplaneGCPProvider(ctx *pulumi.C
 
 	apiConfig.dependsOn = append(apiConfig.dependsOn, gcpProviderConfig)
 	return err
-}
-
-// deploy the nativelink crossplane CompositeResourceDefinition and Composition (one big yaml)
-func (apiConfig *SelfServiceAPIConfig) DeployCrossplane(ctx *pulumi.Context, s *Stack) error {
-	cf, err := yaml.NewConfigFile(ctx, "tfm-aws-xp-yaml", &yaml.ConfigFileArgs{
-		File: fmt.Sprintf("%s/tfm-aws-xp.yaml", s.GlobalCrossplanePath),
-	}, pulumi.Provider(s.K8sProvider), pulumi.DependsOn(apiConfig.dependsOn))
-	if err != nil {
-		return err
-	}
-	apiConfig.dependsOn = append(apiConfig.dependsOn, cf)
-	return nil
 }

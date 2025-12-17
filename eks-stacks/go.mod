@@ -2,9 +2,9 @@ module eks-stack
 
 go 1.22.4
 
-replace tracemachina.com/resources => ../resources/
+replace unir-tfm.com/resources => ../../resources/
 
-replace tracemachina.com/shared => ../shared/
+replace unir-tfm.com/shared => ../../shared/
 
 require (
 	github.com/pulumi/pulumi-aws-iam/sdk v0.2.0
@@ -13,7 +13,7 @@ require (
 	github.com/pulumi/pulumi-eks/sdk v1.0.4
 	github.com/pulumi/pulumi-kubernetes/sdk/v4 v4.22.2
 	github.com/pulumi/pulumi/sdk/v3 v3.167.0
-	tracemachina.com/shared v0.0.0
+	unir-tfm.com/shared v0.0.0
 )
 
 require (

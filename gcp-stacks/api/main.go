@@ -19,7 +19,7 @@ func main() {
 
 		//Refs from other stacks
 
-		baseStackName := fmt.Sprintf("tracemachina/gcp-stack/%v", cfg.Require("globalStack"))
+		baseStackName := fmt.Sprintf("tfm/gcp-stack/%v", cfg.Require("globalStack"))
 		baseStackRef, err := pulumi.NewStackReference(ctx, baseStackName, nil)
 		if err != nil {
 			return err
@@ -31,13 +31,13 @@ func main() {
 			return err
 		}
 
-		monLogStackName := fmt.Sprintf("tracemachina/mon-log/%v", ctx.Stack())
+		monLogStackName := fmt.Sprintf("tfm/mon-log/%v", ctx.Stack())
 		monLogStackRef, err := pulumi.NewStackReference(ctx, monLogStackName, nil)
 		if err != nil {
 			return err
 		}
 
-		sqlStackName := fmt.Sprintf("tracemachina/sql/%v", ctx.Stack())
+		sqlStackName := fmt.Sprintf("tfm/sql/%v", ctx.Stack())
 		sqlStackRef, err := pulumi.NewStackReference(ctx, sqlStackName, nil)
 		if err != nil {
 			return err
@@ -162,7 +162,7 @@ func main() {
 		}
 		env := envRef.Value.(string)
 
-		infraKubeStackName := fmt.Sprintf("tracemachina/infra-kube/%v", cfg.Require("globalStack"))
+		infraKubeStackName := fmt.Sprintf("tfm/infra-kube/%v", cfg.Require("globalStack"))
 		infraKubeStackRef, err := pulumi.NewStackReference(ctx, infraKubeStackName, nil)
 		if err != nil {
 			return err
@@ -224,10 +224,6 @@ func main() {
 		}
 
 		if _, err = apiConfig.DeployCrossplane(ctx, s); err != nil {
-			return err
-		}
-
-		if err = apiConfig.DeployCrossplane(ctx, s); err != nil {
 			return err
 		}
 
